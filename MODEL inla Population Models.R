@@ -1,3 +1,7 @@
+#Warning: these models take between a few hours and 10 days to run and some of the models 
+# on commonnessgroup 0 may never converge becuase of the 0's at the start of the time series
+
+
 suppressPackageStartupMessages( library (INLA))
 INLA:::inla.dynload.workaround()
 
@@ -23,39 +27,40 @@ starttime<- Sys.time()
 
 # load data
 parameters<- read.csv("popModels.csv", stringsAsFactors = F) # models to be run
-allPops<- readRDS(file = "allpopulations.rds")# 
+allPops<- readRDS(file = "allPopulations 2023.rds")# 
 head(allPops); dim(allPops)
 
- plots<-fread( file = "PlotData 5.0.csv"); dim(plots)
- plots<- as.data.frame(plots)
- 
- UKfwPlots<- (read.csv( file = "UKfwSites.csv"))
- plots<- rbind(plots[, names(UKfwPlots)], UKfwPlots)
- dim(plots)
- 
- studies<-read.csv(file = "studies 5.2.csv", header = T); dim(studies)
- 
- allPops <- merge(allPops, plots[, 1:6]); dim(allPops)
- allPops   <- merge(allPops, studies[, c("Datasource_ID", "Datasource_name", "Abundance.Biomass", "Invertebrate_group", "Invertebrate_group_Scientific_name", "Realm", "Experimental_manipulation",
- 	"Continent", "Climate_zone",  "Country_State", "Country", "Region")]); dim(allPops )
+# might need these later 
+plots<-fread( file = "PlotData 5.0.csv"); dim(plots)
+plots<- as.data.frame(plots)
+
+UKfwPlots<- (read.csv( file = "UKfwSites.csv"))
+plots<- rbind(plots[, names(UKfwPlots)], UKfwPlots)
+dim(plots)
+
+studies<-read.csv(file = "studies 5.2.csv", header = T); dim(studies)
+
+allPops <- merge(allPops, plots[, 1:6]); dim(allPops)
+allPops   <- merge(allPops, studies[, c("Datasource_ID", "Datasource_name", "Abundance.Biomass", "Invertebrate_group", "Invertebrate_group_Scientific_name", "Realm", "Experimental_manipulation",
+																				"Continent", "Climate_zone",  "Country_State", "Country", "Region")]); dim(allPops )
 
 
 
 
-# exclude experimental plots and datasets, and data with a trend in taxonomic resolution
+
 exptPlots<- c(5, # alaska
 							921, 922, 924,925, #smes
 							643, 644, 646, 647, # hemlock removal
 							137, 138, 139  #brazil fragmentation experiment
 )
-exptDatasources<- c(300,1364, 1357,1410) #Kellogg, Luiquillo CTE, Cedar creek big bio, some german grassland
+exptDatasources<- c(300,1364, 1357,1387, 1410,  1353, 1402) #Kellogg, Luiquillo CTE, Cedar creek big bio, some german grassland, etc
 
 allPops<- allPops[!allPops$Datasource_ID %in% exptDatasources, ]
 allPops<- allPops[!allPops$Plot_ID %in% exptPlots, ]
 
-# exclude plots with a trend in taxonomic resolution:
+# exclude plots with questionable taxonomy (includes the two German springtial plots):
 bad_tax<- 
-	c(849L, 132L, 1442L, 1527L, 10001L, 10003L, 10005L, 10006L, 10007L, 10008L, 10009L, 10011L, 10012L, 10015L, 10016L, 10017L, 10018L, 
+	c(849L, 132L, 133L, 1442L, 1527L, 10001L, 10003L, 10005L, 10006L, 10007L, 10008L, 10009L, 10011L, 10012L, 10015L, 10016L, 10017L, 10018L, 
 		10019L, 10021L, 10024L, 10025L, 10026L, 10028L, 10029L, 10032L, 10033L, 10034L, 10035L, 10036L, 10038L, 10039L, 10044L, 10048L, 
 		10049L, 10051L, 10052L, 10056L, 10057L, 10058L, 10059L, 10063L, 10066L, 10067L, 10068L, 10070L, 10072L, 10075L, 10079L, 10080L, 
 		10081L, 10082L, 10084L, 10085L, 10087L, 10092L, 10093L, 10097L, 10099L, 10106L, 10108L, 10113L, 10114L, 10115L, 10119L, 10124L, 
@@ -79,14 +84,13 @@ allPops<- allPops[!allPops$Plot_ID %in% bad_tax, ]
 dim(allPops)
 
 
-# make file with high quality data for estimating expected Regression to the Mean effect
+
 library(reshape2)
 nr_yrs<- reshape2::dcast(allPops, Plot_ID~ "yrs_data", value.var = "Year", function(x){length(unique(x))})
 min15_yrs<- subset(nr_yrs, yrs_data >=15)
 dim(min15_yrs)
 hqPops<- subset(allPops, Plot_ID %in% min15_yrs$Plot_ID); dim(hqPops)
 
-# also make file with 10 years (not in paper)
 min10_yrs<- subset(nr_yrs, yrs_data >=10)
 dim(min10_yrs)
 hqPops10<- subset(allPops, Plot_ID %in% min10_yrs$Plot_ID); dim(hqPops10)
@@ -94,13 +98,13 @@ hqPops10<- subset(allPops, Plot_ID %in% min10_yrs$Plot_ID); dim(hqPops10)
 
 
 # create list of needed objects
-# commonness assigned in relation to highest value in year 1
-allPopsCG0Yr1<- subset(allPops, CGYr1.0 == 0);length(unique(allPopsCG0$Taxon)); dim(allPopsCG0Yr1)
-allPopsCG1Yr1<- subset(allPops, CGYr1.0 == 1);length(unique(allPopsCG1$Taxon))
-allPopsCG2Yr1<- subset(allPops, CGYr1.0 == 2);length(unique(allPopsCG2$Taxon))
-allPopsCG3Yr1<- subset(allPops, CGYr1.0 == 3);length(unique(allPopsCG3$Taxon))
-allPopsCG4Yr1<- subset(allPops, CGYr1.0 == 4);length(unique(allPopsCG4$Taxon))
-allPopsCG5Yr1<- subset(allPops, CGYr1.0 == 5);length(unique(allPopsCG5$Taxon))
+# commonness assigned in relation to highest value in whole timeseries
+allPopsCG0<- subset(allPops, CGYr1 == 0);length(unique(allPopsCG0$Taxon)); dim(allPopsCG0)
+allPopsCG1<- subset(allPops, CGYr1 == 1);length(unique(allPopsCG1$Taxon))
+allPopsCG2<- subset(allPops, CGYr1 == 2);length(unique(allPopsCG2$Taxon))
+allPopsCG3<- subset(allPops, CGYr1 == 3);length(unique(allPopsCG3$Taxon))
+allPopsCG4<- subset(allPops, CGYr1 == 4);length(unique(allPopsCG4$Taxon))
+allPopsCG5<- subset(allPops, CGYr1 == 5);length(unique(allPopsCG5$Taxon))
 
 # only datasets with at least 15 years of data
 hqPopsCG0<- subset(hqPops, CGYr1.0 == 0);length(unique(hqPopsCG0$Taxon)); dim(hqPopsCG0)
@@ -110,13 +114,13 @@ hqPopsCG3<- subset(hqPops, CGYr1.0 == 3);length(unique(hqPopsCG3$Taxon))
 hqPopsCG4<- subset(hqPops, CGYr1.0 == 4);length(unique(hqPopsCG4$Taxon))
 hqPopsCG5<- subset(hqPops, CGYr1.0 == 5);length(unique(hqPopsCG5$Taxon))
 
-# commonness assigned in relation to highest value in whole timeseries
-allPopsCG0<- subset(allPops, CGYr1 == 0);length(unique(allPopsCG0$Taxon)); dim(allPopsCG0)
-allPopsCG1<- subset(allPops, CGYr1 == 1);length(unique(allPopsCG1$Taxon))
-allPopsCG2<- subset(allPops, CGYr1 == 2);length(unique(allPopsCG2$Taxon))
-allPopsCG3<- subset(allPops, CGYr1 == 3);length(unique(allPopsCG3$Taxon))
-allPopsCG4<- subset(allPops, CGYr1 == 4);length(unique(allPopsCG4$Taxon))
-allPopsCG5<- subset(allPops, CGYr1 == 5);length(unique(allPopsCG5$Taxon))
+# commonness assigned in relation to highest value in year 1
+allPopsCG0Yr1<- subset(allPops, CGYr1.0 == 0);length(unique(allPopsCG0$Taxon)); dim(allPopsCG0Yr1)
+allPopsCG1Yr1<- subset(allPops, CGYr1.0 == 1);length(unique(allPopsCG1$Taxon))
+allPopsCG2Yr1<- subset(allPops, CGYr1.0 == 2);length(unique(allPopsCG2$Taxon))
+allPopsCG3Yr1<- subset(allPops, CGYr1.0 == 3);length(unique(allPopsCG3$Taxon))
+allPopsCG4Yr1<- subset(allPops, CGYr1.0 == 4);length(unique(allPopsCG4$Taxon))
+allPopsCG5Yr1<- subset(allPops, CGYr1.0 == 5);length(unique(allPopsCG5$Taxon))
 
 # commonness assigned in relation to highest mean value in yr 1-2
 allPopsCG0Yr1.2<- subset(allPops, CG1.2 == 0);length(unique(allPopsCG0$Taxon)); dim(allPopsCG0Yr1.2)
@@ -153,52 +157,52 @@ hqPops10yrCG0<- subset(hqPops10, CGYr1.0 == 0)
 
 
 all.data<-list(allPops = allPops,
-						 allPopsCG0 = allPopsCG0,
-						 allPopsCG1 = allPopsCG1,
-						 allPopsCG2 = allPopsCG2,
-						 allPopsCG3 = allPopsCG3,
-						 allPopsCG4 = allPopsCG4,
-						 allPopsCG5 = allPopsCG5, 
-						 hqPops = hqPops,
-						 hqPopsCG0 = hqPopsCG0,
-						 hqPopsCG1 = hqPopsCG1,
-						 hqPopsCG2 = hqPopsCG2,
-						 hqPopsCG3 = hqPopsCG3,
-						 hqPopsCG4 = hqPopsCG4,
-						 hqPopsCG5 = hqPopsCG5 ,
-						 allPopsCG0Yr1 = allPopsCG0Yr1,
-						 allPopsCG1Yr1 = allPopsCG1Yr1,
-						 allPopsCG2Yr1 = allPopsCG2Yr1,
-						 allPopsCG3Yr1 = allPopsCG3Yr1,
-						 allPopsCG4Yr1 = allPopsCG4Yr1,
-						 allPopsCG5Yr1 = allPopsCG5Yr1, 
-						 allPopsCG0Yr1.2 = allPopsCG0Yr1.2,
-						 allPopsCG1Yr1.2 = allPopsCG1Yr1.2,
-						 allPopsCG2Yr1.2 = allPopsCG2Yr1.2,
-						 allPopsCG3Yr1.2 = allPopsCG3Yr1.2,
-						 allPopsCG4Yr1.2 = allPopsCG4Yr1.2,
-						 allPopsCG5Yr1.2 = allPopsCG5Yr1.2, 
-						 allPopsCG0Yr1.5 = allPopsCG0Yr1.5,
-						 allPopsCG1Yr1.5 = allPopsCG1Yr1.5,
-						 allPopsCG2Yr1.5 = allPopsCG2Yr1.5,
-						 allPopsCG3Yr1.5 = allPopsCG3Yr1.5,
-						 allPopsCG4Yr1.5 = allPopsCG4Yr1.5,
-						 allPopsCG5Yr1.5 = allPopsCG5Yr1.5, 
-						 allPopsCG0allYr = allPopsCG0allYr,
-						 allPopsCG1allYr = allPopsCG1allYr,
-						 allPopsCG2allYr = allPopsCG2allYr,
-						 allPopsCG3allYr = allPopsCG3allYr,
-						 allPopsCG4allYr = allPopsCG4allYr,
-						 allPopsCG5allYr = allPopsCG5allYr, 
-						 hqPops10yrCG5 = hqPops10yrCG5,
-						hqPops10yrCG4 = hqPops10yrCG4,
-						hqPops10yrCG3 = hqPops10yrCG3,
-						hqPops10yrCG2 = hqPops10yrCG2,
-						hqPops10yrCG1 = hqPops10yrCG1,
-						hqPops10yrCG0 = hqPops10yrCG0
+							 allPopsCG0 = allPopsCG0,
+							 allPopsCG1 = allPopsCG1,
+							 allPopsCG2 = allPopsCG2,
+							 allPopsCG3 = allPopsCG3,
+							 allPopsCG4 = allPopsCG4,
+							 allPopsCG5 = allPopsCG5, 
+							 hqPops = hqPops,
+							 hqPopsCG0 = hqPopsCG0,
+							 hqPopsCG1 = hqPopsCG1,
+							 hqPopsCG2 = hqPopsCG2,
+							 hqPopsCG3 = hqPopsCG3,
+							 hqPopsCG4 = hqPopsCG4,
+							 hqPopsCG5 = hqPopsCG5 ,
+							 allPopsCG0Yr1 = allPopsCG0Yr1,
+							 allPopsCG1Yr1 = allPopsCG1Yr1,
+							 allPopsCG2Yr1 = allPopsCG2Yr1,
+							 allPopsCG3Yr1 = allPopsCG3Yr1,
+							 allPopsCG4Yr1 = allPopsCG4Yr1,
+							 allPopsCG5Yr1 = allPopsCG5Yr1, 
+							 allPopsCG0Yr1.2 = allPopsCG0Yr1.2,
+							 allPopsCG1Yr1.2 = allPopsCG1Yr1.2,
+							 allPopsCG2Yr1.2 = allPopsCG2Yr1.2,
+							 allPopsCG3Yr1.2 = allPopsCG3Yr1.2,
+							 allPopsCG4Yr1.2 = allPopsCG4Yr1.2,
+							 allPopsCG5Yr1.2 = allPopsCG5Yr1.2, 
+							 allPopsCG0Yr1.5 = allPopsCG0Yr1.5,
+							 allPopsCG1Yr1.5 = allPopsCG1Yr1.5,
+							 allPopsCG2Yr1.5 = allPopsCG2Yr1.5,
+							 allPopsCG3Yr1.5 = allPopsCG3Yr1.5,
+							 allPopsCG4Yr1.5 = allPopsCG4Yr1.5,
+							 allPopsCG5Yr1.5 = allPopsCG5Yr1.5, 
+							 allPopsCG0allYr = allPopsCG0allYr,
+							 allPopsCG1allYr = allPopsCG1allYr,
+							 allPopsCG2allYr = allPopsCG2allYr,
+							 allPopsCG3allYr = allPopsCG3allYr,
+							 allPopsCG4allYr = allPopsCG4allYr,
+							 allPopsCG5allYr = allPopsCG5allYr, 
+							 hqPops10yrCG5 = hqPops10yrCG5,
+							 hqPops10yrCG4 = hqPops10yrCG4,
+							 hqPops10yrCG3 = hqPops10yrCG3,
+							 hqPops10yrCG2 = hqPops10yrCG2,
+							 hqPops10yrCG1 = hqPops10yrCG1,
+							 hqPops10yrCG0 = hqPops10yrCG0
+							 
+)
 
-						 )
-					 
 
 
 taskID
@@ -235,10 +239,8 @@ prior.prec <- list(prec = list(prior = "pc.prec", param = c(sd.res, 0.01))) #1% 
 
 
 
-
-
 formul<-as.formula(paste(parameters$y[taskID], " ~ ", parameters$model_formula[taskID]   ,
-			"+f(TaxonPlot_4INLA,model='iid')+
+												 "+f(TaxonPlot_4INLA,model='iid')+
                          f(Plot_ID_4INLA,model='iid', hyper = prior.prec )+
                          f(Location_4INLA,model='iid', hyper = prior.prec)+
                          f(Datasource_ID_4INLA,model='iid', hyper = prior.prec)+
@@ -248,17 +250,18 @@ formul<-as.formula(paste(parameters$y[taskID], " ~ ", parameters$model_formula[t
                          f(Datasource_ID_4INLAs,iYear,model='iid', hyper = prior.prec)+
 			 f(iYear, model='ou', replicate=as.numeric(Plot_ID_4INLA), 
 			hyper = list(theta1 = list(prior='pc.prec')))"
-												 ))
+))
 print(formul)
 
 
 
 model <- inla( formul,
+							 family = 'Poisson',
 							 control.compute = list(config = TRUE, 
-										dic=TRUE,
-										waic=TRUE, 
-										cpo = TRUE, 
-										openmp.strategy="huge"), 
+							 											 dic=TRUE,
+							 											 waic=TRUE, 
+							 											 cpo = TRUE, 
+							 											 openmp.strategy="huge"), 
 							 control.inla = list( tolerance =  1e-08), 
 							 control.predictor = list(link = 1) , verbose = T, 
 							 quantiles=c(0.001, 0.01, 0.025, 0.05, 0.1, 0.3, 0.5, 0.7, 0.9, 0.95, 0.975, 0.99, 0.999)  ,    
@@ -283,27 +286,18 @@ saveRDS (fixed, file = fixed_file)
 
 
 # extract posterior marginals and sample posteriors
-# m <-  data.frame(Metric = metric, 
-# 		 Realm = "Freshwater",
-# 		 inla.smarginal(model$marginals.fixed$`RealmFreshwater:cYear`, factor = 50))
 n <-  data.frame(Metric = metric, 
-		 Realm = "Terrestrial",
-		 inla.smarginal(model$marginals.fixed$`cYear`, factor = 50))
+								 Realm = "Terrestrial",
+								 inla.smarginal(model$marginals.fixed$`cYear`, factor = 50))
 marg<- n#rbind(m,n)
 
 marg$y80<- marg$y
-#marg$y80  [ marg$Realm == "Freshwater"  & marg$x< fixed["RealmFreshwater:cYear", "0.1quant"] ]<- NA # allocate 0 to evrything below the 80% quantile 
-#marg$y80  [ marg$Realm == "Freshwater"  & marg$x> fixed["RealmFreshwater:cYear", "0.9quant"] ]<- NA
 marg$y80  [ marg$Realm == "Terrestrial" & marg$x< fixed["cYear", "0.1quant"] ]<- NA # allocate 0 to everything below the 80% quantile 
 marg$y80  [ marg$Realm == "Terrestrial" & marg$x> fixed["cYear", "0.9quant"] ]<- NA
 marg$y90<- marg$y
-#marg$y90  [ marg$Realm == "Freshwater"  & marg$x< fixed["RealmFreshwater:cYear", "0.05quant"] ]<- NA # allocate 0 to evrything below the 90% quantile 
-#marg$y90  [ marg$Realm == "Freshwater"  & marg$x> fixed["RealmFreshwater:cYear", "0.95quant"] ]<- NA
 marg$y90  [ marg$Realm == "Terrestrial" & marg$x< fixed["cYear", "0.05quant"] ]<- NA # allocate 0 to everything below the 90% quantile 
 marg$y90  [ marg$Realm == "Terrestrial" & marg$x> fixed["cYear", "0.95quant"] ]<- NA
 marg$y95<- marg$y
-#marg$y95  [ marg$Realm == "Freshwater"  & marg$x< fixed["RealmFreshwater:cYear", "0.025quant"] ]<- NA # allocate 0 to evrything below the 95% quantile 
-#marg$y95  [ marg$Realm == "Freshwater"  & marg$x> fixed["RealmFreshwater:cYear", "0.975quant"] ]<- NA
 marg$y95  [ marg$Realm == "Terrestrial" & marg$x< fixed["cYear", "0.025quant"] ]<- NA # allocate 0 to everything below the 95% quantile 
 marg$y95  [ marg$Realm == "Terrestrial" & marg$x> fixed["cYear", "0.975quant"] ]<- NA
 
@@ -333,8 +327,8 @@ RandEfDataset <- merge(RandEfDataset, slopes, by.x="Datasource_ID_4INLAs", by.y=
 # add up fixed slope and random slopes
 
 fx<-data.frame(Realm =  "Terrestrial", #
-               fixedSlp = model$summary.fixed$mean[2], 
-               fixedIntercept = (model$summary.fixed$mean[1]  ) )
+							 fixedSlp = model$summary.fixed$mean[2], 
+							 fixedIntercept = (model$summary.fixed$mean[1]  ) )
 RandEfDataset<- merge(RandEfDataset, fx, by = "Realm" )
 RandEfDataset$slope <- RandEfDataset$'DataID_Slope_ mean'+ RandEfDataset$fixedSlp # sum of fixed and random slopes  
 
@@ -343,21 +337,12 @@ rand_file <- file.path(output_dir, paste0(metric,"randomSlopes.rds"))
 
 saveRDS (RandEfDataset, file =  rand_file)
 
-#+
-#			 f(iYear, model='ou', replicate=as.numeric(TaxonPlot_4INLA), 
-#			hyper = list(theta1 = list(prior='pc.prec')))
-
-#+
-#			 f(iYear, model='ou', 
-#			hyper = list(theta1 = list(prior='pc.prec')))
-
-
 
 
 
 # all random slopes 
 allRandEf <- 	unique(dat[,c("Datasource_ID", "Datasource_name", "Datasource_ID_4INLA", "Datasource_ID_4INLAs", "Realm", "TaxonPlot_4INLAs",'Plot_ID_4INLAs', "Location_4INLAs" )])
-	
+
 
 
 
