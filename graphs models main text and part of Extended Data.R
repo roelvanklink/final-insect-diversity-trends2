@@ -158,7 +158,7 @@ length(unique(subset(completeData2023, Realm == "Terrestrial")$Plot_ID)	) # tota
 
 
 
-# make Extended Data Table 1 Data availability: #####
+# make Extended Data Table 1: Data availability: #####
 length(unique(completeData2023$Datasource_ID))
 length(unique(completeData2023$Plot_ID))
 
@@ -173,7 +173,7 @@ metadata_metrics2 <- metadata_metrics # needed later
 
 
 
-# relect rows and order columns
+# Select rows and order columns
 tabS1<- metadata_metrics[metadata_metrics$Unit %in% c("abundance", "richness", "rarefiedRichness", "ENSPIE", "coverageRichness.7", "logNr4060")    ,  ]
 tabS1[c(1,6,3,5,2, 4),]
 
@@ -562,10 +562,10 @@ SimpsonevennessMarg$Metric <- "Evenness"
 univar<- rbind(abMarg, richMarg, rarRichMarg, CovMarg,  pieMarg)
 univar<- rbind(abMarg, richMarg, rarRichMarg, CovMarg,  pieMarg, shanMarg,  SimpsonevennessMarg)
 univar$Metric<- factor(univar$Metric, levels = c ("Abundance", "Richness", "Rarefied\nrichness", "Coverage\nrichness",
-																									"Diversity\n(Shannon)", "Diversity\n(Simpson)", "Evenness"  ))
+																									"Diversity\n(Shannon)", "Diversity\n(Simpson)", "Evenness"  )) # right order
 
 
-
+# make axis labels:
 brks<- c(-0.02, -0.01, -0.005, 0, 0.005, 0.01, 0.015, 0.02, 0.03, 0.04)
 perc<-(10^(brks )  *100) - 100
 l<- paste(brks, paste0(round(perc,1), "%"),sep = "\n")
@@ -650,9 +650,6 @@ quantile(abRandom$abundanceSlope)
 
 
 # ANALYSIS Part 2: SAD changes #####
-# number of dominant and rare species: (upper and lower 20% of abundance ) 
-setwd("")
-
 sads<- subset(completeData2023, Unit ==  "logNr020" |  Unit ==   "logNr2040"|  Unit == "logNr4060" |  Unit == "logNr6080"|  Unit ==  "logNr80100")
 piv<- dcast(subset(sads, !is.na(Number)), Plot_ID+ Year ~ Unit, value.var = "Number", mean)
 #pivot_wider(sads, id_cols = Plot_ID, from = Unit, values_from = Number, values_fn = mean)
@@ -724,12 +721,12 @@ ggplot(subset(quantilesData, y>1 | y< -1 ), aes(x = x, y = y))+
 	)
 
 
-
-
 ggsave(filename = "Fig 3 SAD changes.png" , path = figure_path, width = 8.9, height = 6,  units = "cm",dpi = 600, device = "png")
 ggsave(filename = "Fig 3 SAD changes.pdf" , path = figure_path, width = 8.9, height = 6,  units = "cm",dpi = 300, device = "pdf")
 
-# pane b: simple explanation of SAD: 
+
+
+# removed from paper: simple explanation of SAD: 
 sim<- data.frame(
 	Number = c(20, 15, 5 ,2, 1), 
 	SADSection = c('0-20%', '20-40%' , '40-60%' , '60-80%', '80-100%'    )
@@ -787,7 +784,7 @@ exptDatasources<- c(300,1364, 1357,1410, 1353, 1402) #Kellogg, Luiquillo CTE, Ce
 allPops<- allPops[!allPops$Datasource_ID %in% exptDatasources, ]
 allPops<- allPops[!allPops$Plot_ID %in% exptPlots, ]
 
-# exclude plots with a trend in taxonomic resolution:
+# exclude plots with a trend in taxonomic resolution (most of these are no longer in data anyway):
 bad_tax<- 
 	c(849L, 132L, 133L, 1442L, 1527L, 10001L, 10003L, 10005L, 10006L, 10007L, 10008L, 10009L, 10011L, 10012L, 10015L, 10016L, 10017L, 10018L, 10019L, 10021L, 10024L, 10025L, 10026L, 10028L, 10029L, 10032L, 10033L, 10034L, 10035L, 10036L, 10038L, 10039L, 10044L, 10048L,	10049L, 10051L, 10052L, 10056L, 10057L, 10058L, 10059L, 10063L, 10066L, 10067L, 10068L, 10070L, 10072L, 10075L, 10079L, 10080L, 		10081L, 10082L, 10084L, 10085L, 10087L, 10092L, 10093L, 10097L, 10099L, 10106L, 10108L, 10113L, 10114L, 10115L, 10119L, 10124L, 	10125L, 10127L, 10128L, 10130L, 10135L, 10137L, 10138L, 10145L, 10146L, 10147L, 10149L, 10158L, 10160L, 10163L, 10164L, 10165L, 		10168L, 10169L, 10170L, 10171L, 10173L, 10175L, 10178L, 10180L, 10181L, 10182L, 10185L, 10187L, 10188L, 10189L, 10192L, 10193L, 		10195L, 10196L, 10198L, 10349L, 10200L, 10201L, 10204L, 10206L, 10208L, 10212L, 10215L, 10216L, 10219L, 10221L, 10223L, 10224L, 		10225L, 10226L, 10227L, 10229L, 10230L, 10233L, 10236L, 10249L, 10250L, 10252L, 10253L, 10254L, 10255L, 10256L, 10257L, 10258L, 		10259L, 10277L, 10279L, 10280L, 10281L, 10282L, 10283L, 10284L, 10285L, 10286L, 10287L, 10289L, 10290L, 10291L, 10292L, 10294L, 		10295L, 10297L, 10298L, 10299L, 10301L, 10302L, 10303L, 10304L, 10305L, 10306L, 10307L, 10308L, 10309L, 10311L, 10312L, 10313L, 
 		10314L, 10315L, 10316L, 10317L, 10318L, 10320L, 10321L, 10322L, 10323L, 10325L, 10326L, 10327L, 10328L, 10329L, 10331L, 10332L, 		10334L, 10335L, 10336L, 10337L, 10338L, 10339L, 10340L, 10342L, 10343L, 10344L, 10346L, 10348L, 10469L, 10350L, 10351L, 10352L, 		10353L, 10354L, 10355L, 10356L, 10357L, 10361L, 10362L, 10364L, 10365L, 10366L, 10368L, 10369L, 10370L, 10371L, 10373L, 10374L, 		10375L, 10376L, 10378L, 10379L, 10380L, 10381L, 10382L, 10383L, 10384L, 10385L, 10386L, 10387L, 10388L, 10389L, 10390L, 10391L, 		10392L, 10393L, 10394L, 10395L, 10398L, 10399L, 10400L, 10401L, 10403L, 10404L, 10407L, 10408L, 10409L, 10410L, 10412L, 10413L, 		10414L, 10415L, 10416L, 10417L, 10418L, 10419L, 10421L, 10422L, 10424L, 10425L, 10426L, 10427L, 10428L, 10429L, 10430L, 10431L, 		10432L, 10433L, 10434L, 10435L, 10436L, 10437L, 10438L, 10439L, 10475L, 10440L, 10441L, 10442L, 10443L, 10444L, 10445L, 10446L, 	10448L, 10449L, 10485L, 10452L, 10454L, 10455L, 10457L, 10458L, 10459L, 10460L, 10463L, 10464L, 10465L, 10467L, 10468L, 10470L, 		10474L, 10499L, 10491L, 10490L, 10498L, 10489L, 10506L, 10503L, 10511L, 10504L, 10500L, 10501L)
@@ -1115,7 +1112,6 @@ randPops$SADinterval<- ordered(randPops$SADinterval, # Reorder for clarity
 library(ggdist)
 library(wesanderson)
 
-brks<- c(-0.35, -0.30, -0.25, -0.20, -0.15, -0.10, -0.05,   0, 0.05, 0.10, 0.15)
 brks<- c( -0.30, -0.20, -0.10, 0,  0.10, 0.2)
 perc<-(exp(brks )  *100) - 100
 l<- paste(brks, paste0(round(perc,1), "%"),sep = "\n")
@@ -1307,7 +1303,7 @@ ggplot(randPops3 )+
 
 
 
-# population models sensitivity (fg ED 7) #####
+# population models sensitivity (ED fig 7) #####
 # normal version (classification in respect to highest observed value)
 pop1sum <- as.data.frame(readRDS("inlaPop1TSUMMARY.rds"))[ 2, ]
 pop2sum <- as.data.frame(readRDS("inlaPop2TSUMMARY.rds"))[ 2, ]
@@ -1727,7 +1723,7 @@ ggsave(filename = "van Klink ED Fig 1 map.jpg" , path = figure_path, width = 250
 
 
 #   fitted vs predicted values  Looks good!  #####
-#  fitted vs predicted values  Looks good!  #####
+
 inlaRich<- readRDS('inlaRichnessTTEST.rds')
 cDrichness$preds <- inlaRich$summary.fitted.values$mean  #need to have control.predictor = list(link = 1) in model
 ggplot(cDrichness,aes(x=preds,y=log10(Number+1)))+
