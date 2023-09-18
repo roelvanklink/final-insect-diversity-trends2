@@ -9,8 +9,9 @@ lntps<-  c("Terrestrial" = 2,  "Freshwater" = 3)
 
 source("D:/work/2017 iDiv/2018 insect biomass/insect-richness-trends/R/calculate metrics.R")
 setwd("C:/Users/rk59zeqi/Documents/model outputs richness paper") # work
+taxa<-read.csv( file = "C:\\Dropbox\\Insect Biomass Trends/csvs/taxa5.2.csv"); dim(taxa)
 
-load("C:\\Dropbox\\Insect Biomass Trends/csvs/completeData2022pure.Rdata"); dim(completeData2022pure) # 
+load("C:\\Dropbox\\Insect Biomass Trends/csvs/completeData2023pure.Rdata"); dim(completeData2023pure) # 
 
 # exclude plots with a trend in taxonomic resolution: 
 bad_tax<- 
@@ -34,9 +35,25 @@ bad_tax<-
 		10448L, 10449L, 10485L, 10452L, 10454L, 10455L, 10457L, 10458L, 10459L, 10460L, 10463L, 10464L, 10465L, 10467L, 10468L, 10470L, 
 		10474L, 10499L, 10491L, 10490L, 10498L, 10489L, 10506L, 10503L, 10511L, 10504L, 10500L, 10501L)
 
-completeData2022pure<- completeData2022pure[!completeData2022pure$Plot_ID %in% bad_tax, ]
+completeData2023pure<- completeData2023pure[!completeData2023pure$Plot_ID %in% bad_tax, ]
 
-dim(completeData2022pure)
+dim(completeData2023pure)
+
+# exclude experimental data: 
+# exclude experimental sites
+exptPlots<- c(5, # alaska
+							921, 922, 924,925, #smes
+							643, 644, 646, 647, # hemlock removal
+							137, 138, 139  #brazil fragmentation experiment
+)
+# exlude experimental datasets
+exptDatasources<- c(300,1364, 1357, 1387, 1410) #Kellogg, Luquillo CTE, Cedar creek big bio, australian spiders, some German grassland
+
+completeData2023pure<- completeData2023pure[!completeData2023pure$Datasource_ID %in% exptDatasources, ]
+completeData2023pure<- completeData2023pure[!completeData2023pure$Plot_ID %in% exptPlots, ]
+completeData2023pure<- subset(completeData2023pure, Datasource_ID != 1353 & Datasource_ID != 1402) # remove ant bait and russian springtails
+
+completeData2023pure<- subset(completeData2023pure, Datasource_ID != 1353 & Datasource_ID != 1402 )
 
 
 plots<-as.data.frame(fread( file = "C:\\Dropbox\\Insect Biomass Trends/csvs/PlotData 5.0.csv")); dim(plots)
@@ -44,12 +61,12 @@ UKfwPlots<- read.csv( file = "C:\\Dropbox\\Insect Biomass Trends/csvs/UKfwSites.
 plots<- rbind(plots[, names(UKfwPlots)], UKfwPlots); dim(plots)
 
 figure_path<- "D:/work/2017 iDiv/2018 insect biomass/insect-richness-trends/Figures/"
-completeData2022<- completeData2022pure
+completeData2023<- completeData2023pure
 
 
 # make explanatory figure for SAD intervals#####
 # fig  Methods / under Fig 4 and S4 
-Biotime <- read.csv( file = "C:\\Dropbox\\Insect Biomass Trends/csvs/BioTIMEstd2022.csv"); unique(Biotime$Datasource_name)
+Biotime <- read.csv( file = "C:\\Dropbox\\Insect Biomass Trends/csvs/BioTIMEstd2023.csv"); unique(Biotime$Datasource_name)
 
 uk<- subset(Biotime, Datasource_name == "BT380 UK chalk grassland butterflies"  )
 dk<- subset(Biotime, Datasource_name == "BT249 DK lighttrap"  )
@@ -193,7 +210,7 @@ brks<- c(max(log10(data$Number+1)+0.0001),
 # cut everything down to last 10 years, exclude everything that can't be cut 
 
 # what's the cutoff year for each plot? 
-metadata_per_plotZ<- completeData2022pure %>% 
+metadata_per_plotZ<- completeData2023pure %>% 
 	group_by(Plot_ID) %>%
 	summarise(
 		Plot_ID = unique(Plot_ID),
@@ -206,11 +223,11 @@ metadata_per_plotZ<- completeData2022pure %>%
 		cutoffYear = max(Year, na.rm = T)-10
 	)
 
-completeData2022pure<-   merge(completeData2022pure, metadata_per_plotZ )
+completeData2023pure<-   merge(completeData2023pure, metadata_per_plotZ )
 
-completeData2022pureShort <-subset(completeData2022pure, Year> cutoffYear); dim(completeData2022pureShort)
+completeData2023pureShort <-subset(completeData2023pure, Year> cutoffYear); dim(completeData2023pureShort)
 # 
-metadata_per_plotZ1<- completeData2022pureShort %>% 
+metadata_per_plotZ1<- completeData2023pureShort %>% 
 	group_by(Plot_ID) %>%
 	summarise(
 		Plot_ID = unique(Plot_ID),
@@ -223,7 +240,7 @@ metadata_per_plotZ1<- completeData2022pureShort %>%
 		cutoffYear = max(Year, na.rm = T)-10
 	) # correct 
 
-metadata_per_plotZ1<- subset(completeData2022pureShort, !is.na(Number)) %>% 
+metadata_per_plotZ1<- subset(completeData2023pureShort, !is.na(Number)) %>% 
 	group_by(Plot_ID) %>%
 	summarise(
 		Plot_ID = unique(Plot_ID),
@@ -239,27 +256,27 @@ metadata_per_plotZ1<- subset(completeData2022pureShort, !is.na(Number)) %>%
 
 # make the needed datasets
 metadata_per_plotZ2<- subset(metadata_per_plotZ1, Duration >=10)
-dim(metadata_per_plotZ2) #1630 plots
-length(unique(metadata_per_plotZ2$Datasource_ID)) # 127 datasets
+dim(metadata_per_plotZ2) # 1010 plots
+length(unique(metadata_per_plotZ2$Datasource_ID)) # 107 datasets
 
 # now exclude all datasets that are not long enough
-completeData2022Short <-subset(completeData2022pure, Plot_ID %in% metadata_per_plotZ2$Plot_ID)
-saveRDS(completeData2022Short, file = "C:\\Dropbox\\Insect Biomass Trends/csvs/completeData2022short.rds")
+completeData2023Short <-subset(completeData2023pure, Plot_ID %in% metadata_per_plotZ2$Plot_ID)
+saveRDS(completeData2023Short, file = "C:\\Dropbox\\Insect Biomass Trends/csvs/completeData2023short.rds")
 
 
 
 # Long: keep only 20+ years data #
 metadata_per_plotZ3<- subset(metadata_per_plotZ, Duration > 20); dim(metadata_per_plotZ3)#549
-length(unique(metadata_per_plotZ3$Datasource_ID)) # 77 datasets
+length(unique(metadata_per_plotZ3$Datasource_ID)) # 66 datasets
 
 #hypothetically 30 yr cutoff
 metadata_per_plotZ4<- subset(metadata_per_plotZ, Duration > 30); dim(metadata_per_plotZ4)#148
-length(unique(metadata_per_plotZ4$Datasource_ID)) # 34 datasets
+length(unique(metadata_per_plotZ4$Datasource_ID)) # 29 datasets
 
 
 
-completeData2022long <-subset(completeData2022pure, Plot_ID %in% metadata_per_plotZ3$Plot_ID); dim(completeData2022long)
-saveRDS(completeData2022long, file = "C:\\Dropbox\\Insect Biomass Trends/csvs/completeData2022long.rds")
+completeData2023long <-subset(completeData2023pure, Plot_ID %in% metadata_per_plotZ3$Plot_ID); dim(completeData2023long)
+saveRDS(completeData2023long, file = "C:\\Dropbox\\Insect Biomass Trends/csvs/completeData2023long.rds")
 
 
 # Plot Fig S2 short & long####
@@ -348,11 +365,11 @@ ggplot(univar, aes(x = x, y = y))+
 	theme(axis.text.y=element_blank(),
 				axis.ticks.y=element_blank(), 
 				legend.key=element_blank(), 
-				legend.position="none"
-	)
+				legend.position="none")
 
-ggsave(filename = "Fig S2 timeseries length.png" , path = figure_path, width = 18, height = 18,  units = "cm",dpi = 300, device = "png")
-ggsave(filename = "Fig S2 timeseries length.pdf" , path = figure_path, width = 18, height = 18,  units = "cm",dpi = 300, device = "pdf")
+ggsave(filename = "Van Klink ED Fig 2 timeseries length.jpg" , path = figure_path, width = 15, height = 15,  units = "cm",dpi = 300, device = "jpg")
+ggsave(filename = "Van Klink ED Fig 2 timeseries length.pdf" , path = figure_path, width = 15, height = 15,  units = "cm",dpi = 300, device = "pdf")
+ggsave(filename = "Van Klink ED Fig 2 timeseries length.png" , path = figure_path, width = 15, height = 15,  units = "cm",dpi = 300, device = "png")
 
 
 
@@ -364,7 +381,7 @@ ggsave(filename = "Fig S2 timeseries length.pdf" , path = figure_path, width = 1
 #  Prep data to test effect of large datasets (large number of plots):  #####
 
 
-metadata_per_dataset<-  completeData2022pure %>% 
+metadata_per_dataset<-  completeData2023pure %>% 
 	     group_by(Datasource_ID) %>%
 	     summarise(
 		         Datasource_ID = unique(Datasource_ID),
@@ -386,11 +403,10 @@ metadata_per_dataset<-  completeData2022pure %>%
  ggplot(metadata_per_dataset, aes(x = Datasource_name , y = Number_of_plots))+
 	          geom_point()+ coord_flip()+ facet_wrap(.~Realm)
  hist(metadata_per_dataset$Number_of_plots)
- median(metadata_per_dataset$Number_of_plots)
- 3
- mean(metadata_per_dataset$Number_of_plots)
- 11.7
+ median(metadata_per_dataset$Number_of_plots)#3
+ mean(metadata_per_dataset$Number_of_plots) # 8.6
 
+ #visualize how many plots there are in datasets 
  ggplot(subset(metadata_per_dataset, Number_of_plots >5),
  			 aes(x = Datasource_name , y = Number_of_plots))+
  	geom_point()+ coord_flip()+ facet_wrap(.~Realm)+
@@ -400,8 +416,37 @@ metadata_per_dataset<-  completeData2022pure %>%
  geom_hline(yintercept = 10)
  
  
- nrow(subset(metadata_per_dataset, Number_of_plots >10)) # 36
- nrow(subset(metadata_per_dataset, Number_of_plots >50)) # 11
+ nrow(subset(metadata_per_dataset, Number_of_plots >10)) # 31
+ nrow(subset(metadata_per_dataset, Number_of_plots >50)) # 6
+ 
+ metadata_per_plot<-  completeData2023pure %>% 
+ 	group_by(Plot_ID) %>%
+ 	summarise(
+ 		Datasource_ID = unique(Datasource_ID),
+ 		Datasource_name = unique(Datasource_name), 
+ 		nPlot_names = length(unique(Plot_name)), 
+ 		Realm = unique(Realm),
+ 		Taxonomic_scope =  (unique(Invertebrate_group)),
+ 		Taxonomic_precision =  paste(unique(Taxonomic_precision), collapse = " "), 
+ 		Source_of_values = unique(source),
+ 		Start_year = min(Year, na.rm = T),
+ 		End_year = max(Year, na.rm = T),
+ 		Duration = (max(Year, na.rm = T) - min(Year, na.rm = T))+1, 
+ 		Country_State = unique(Country_State),
+ 		Country = unique(Country),
+ 		Region = unique(Region),
+ 		#Stratum = length(unique(Stratum)),
+ 		Longitude = unique(Longitude),
+ 		Latitude = unique(Latitude),
+ 		AbundanceBiomass = unique(Abundance.Biomass),
+ 		Number_of_samples = length(unique(paste(Year, Period))),
+ 		Number_of_years = length(unique(Year))
+ 	)
+ dim(metadata_per_plot) # 923
+ str(metadata_per_plot)
+ length(unique(completeData2023pure$Plot_ID))# same
+ subset(metadata_per_plot, Datasource_ID == '79')
+ subset(metadata_per_plot, Duration <10)
  
  
  
@@ -413,11 +458,11 @@ metadata_per_dataset<-  completeData2022pure %>%
 		 
 		 
 		# split dataset in data to be used as is, and data that needs to be made smaller 
-		completeData2022Good<- subset(completeData2022, !Datasource_ID %in% badDatasets$Datasource_ID) 
-		completeData2022bad<- subset(completeData2022, Datasource_ID %in% badDatasets$Datasource_ID) 
+		completeData2023Good<- subset(completeData2023pure, !Datasource_ID %in% badDatasets$Datasource_ID) 
+		completeData2023bad<- subset(completeData2023pure, Datasource_ID %in% badDatasets$Datasource_ID) 
 		
 		badDatasets<- badDatasets$Datasource_ID 
-		badDatasets<- badDatasets[badDatasets %in% completeData2022$Datasource_ID]
+		badDatasets<- badDatasets[badDatasets %in% completeData2023pure$Datasource_ID]
 		 
 		
 		
@@ -437,7 +482,7 @@ metadata_per_dataset<-  completeData2022pure %>%
 		
 		
 		
-		dat1<- subset(completeData2022bad, Datasource_ID == dataset)
+		dat1<- subset(completeData2023bad, Datasource_ID == dataset)
 		#get number of locations: 
 		length(unique(dat1$Plot_ID))
 		nLocs<- length(unique(dat1$Location))
@@ -527,7 +572,7 @@ metadata_per_dataset<-  completeData2022pure %>%
 				 	dat1<- dat1[, -(which(names(dat1) == 'Location'))]
 				 	
 				 	
-						dat1<- merge(dat1, plots)
+						#dat1<- merge(dat1, plots[, c("Plot_ID" , "Latitude", "Longitude")])
 						dat1$Latitude[dat1$Latitude == 0]<- NA # rmove any 0's for missing data
 						dat1$Longitude[dat1$Longitude == 0]<- NA
 						
@@ -608,12 +653,12 @@ metadata_per_dataset<-  completeData2022pure %>%
 
 			# select these from DF 
  
-			completeData2022badselected<- subset(completeData2022bad, Plot_ID %in% selectedPlots) 
+			completeData2023badselected<- subset(completeData2023bad, Plot_ID %in% selectedPlots) 
 			
 			#stitch back together and assign name
-				cDfixed<- rbind(completeData2022Good, completeData2022badselected) 
+				cDfixed<- rbind(completeData2023Good, completeData2023badselected) 
 				path<- "C:\\Dropbox\\Insect Biomass Trends/csvs/"
-				dfname<- paste0("completeData2022max", maxNrPlots, "plots"); dfname
+				dfname<- paste0("completeData2023max", maxNrPlots, "plots"); dfname
 				
 				#assign(dfname, cDfixed)
 				
@@ -623,7 +668,7 @@ metadata_per_dataset<-  completeData2022pure %>%
 				dim(cDfixed) #works
 
 
-# Plot Fig S3####
+# Plot Fig S3 number of sites####
 #	get standard model outputs: Abundance, richness, pie. 
 
 	inlaRichSum<- as.data.frame(readRDS("inlaRichnessTSUMMARY.rds"))
@@ -730,15 +775,15 @@ metadata_per_dataset<-  completeData2022pure %>%
 		)
 	
 	
-	ggsave(filename = "Fig S3 number of plots.png" , path = figure_path, width = 18, height = 20,  units = "cm",dpi = 300, device = "png")
-	ggsave(filename = "Fig S3 number of plots.pdf" , path = figure_path, width = 18, height = 20,  units = "cm",dpi = 300, device = "pdf")
+	ggsave(filename = "Fig S3 number of plots.png" , path = figure_path, width = 15, height = 17,  units = "cm",dpi = 300, device = "png")
+	ggsave(filename = "Fig S3 number of plots.pdf" , path = figure_path, width = 15, height = 17,  units = "cm",dpi = 300, device = "pdf")
 	
 	
 	
 				
 # Plot Fig S5 quartiles #####
 # Quartiles based on distribution of abundance values (0.25, median, 0.75)
-sads<- subset(completeData2022pure, Unit ==  "logNrQ1" |  Unit ==   "logNrQ2"|  Unit == "logNrQ3" |  Unit == "logNrQ4")
+sads<- subset(completeData2023pure, Unit ==  "logNrQ1" |  Unit ==   "logNrQ2"|  Unit == "logNrQ3" |  Unit == "logNrQ4")
 piv<- dcast(subset(sads, !is.na(Number)), Plot_ID+ Year ~ Unit, value.var = "Number", mean)
 pivot_wider(sads, id_cols = Plot_ID, from = Unit, values_from = Number, values_fn = mean)
 
@@ -786,13 +831,13 @@ ggplot(subset(quartilesData, y>1 | y< -1 ), aes(x = x, y = y))+
 	geom_area(  aes(x = x, y = y90, fill = Realm), alpha = 0.6)+
 	geom_area(  aes(x = x, y = y95, fill = Realm), alpha = 0.3)+
 	geom_area( aes(x = x, y = y, fill = Realm), alpha = 0.3)+
-	geom_vline(xintercept = 0)+
 	coord_flip()+
+	geom_vline(xintercept = 0, linetype = 'dashed')+
 	facet_grid(cols = vars(Metric), switch = "x")+
 	ylab ("SAD quartile")+  xlab("Trend slope  \n % change per year")+
 	scale_fill_manual(values = col.scheme.realm2)+
 	scale_x_continuous(breaks = brks,labels = l)+#, limits=c(-0.005,  0.01))+
-	ggtitle("Number of species per SAD quartile")+
+	#ggtitle("Number of species per SAD quartile")+
 	theme_classic()+
 	theme(axis.text.x=element_blank(),
 				axis.ticks.x=element_blank(), 
@@ -801,8 +846,8 @@ ggplot(subset(quartilesData, y>1 | y< -1 ), aes(x = x, y = y))+
 				strip.background = element_rect(colour = "white")
 	)
 
-ggsave(filename = "Fig S5 quartiles.png" , path = figure_path, width = 12, height = 12,  units = "cm",dpi = 300, device = "png")
-ggsave(filename = "Fig S5 quartiles.pdf" , path = figure_path, width = 12, height = 12,  units = "cm",dpi = 300, device = "pdf")
+ggsave(filename = "Fig S5 quartiles.png" , path = figure_path, width = 8.9, height = 8.9,  units = "cm",dpi = 300, device = "png")
+ggsave(filename = "Fig S5 quartiles.pdf" , path = figure_path, width = 8.9, height = 8.9,  units = "cm",dpi = 300, device = "pdf")
 
 
 				
@@ -817,7 +862,7 @@ ggsave(filename = "Fig S5 quartiles.pdf" , path = figure_path, width = 12, heigh
 				
  # Prep data for effect of bias towards Europe and North America #####
 			
-			metadata_per_datasetX<- subset(completeData2022pure, Unit == "richness") %>% 
+			metadata_per_datasetX<- subset(completeData2023pure, Unit == "richness") %>% 
 				group_by(Datasource_ID) %>%
 				summarise(
 					Datasource_ID = unique(Datasource_ID),
@@ -846,13 +891,13 @@ median(subset(datasets, Var2 == "Freshwater")$Freq )
 
 
 #   
-completeData2022$Continent2<- completeData2022$Continent
-completeData2022$Continent2[completeData2022$Continent2 == "Oceania"] <- "Rest"
-completeData2022$Continent2[completeData2022$Continent2 == "Asia"] <- "Rest"
-completeData2022$Continent2[completeData2022$Continent2 == "Latin America"] <- "Rest"
-completeData2022$Continent2[completeData2022$Continent2 == "Africa"] <- "Rest"
+completeData2023$Continent2<- completeData2023$Continent
+completeData2023$Continent2[completeData2023$Continent2 == "Oceania"] <- "Rest"
+completeData2023$Continent2[completeData2023$Continent2 == "Asia"] <- "Rest"
+completeData2023$Continent2[completeData2023$Continent2 == "Latin America"] <- "Rest"
+completeData2023$Continent2[completeData2023$Continent2 == "Africa"] <- "Rest"
 # sorry people
-metadata_per_cont<- completeData2022 %>% 
+metadata_per_cont<- completeData2023 %>% 
 	group_by(Continent2, Realm, Unit ) %>%
 	summarise(
 		Datasets = length(unique(Datasource_ID)),
@@ -985,10 +1030,8 @@ ContMargs$Continent<- factor(ContMargs$Continent, levels = c ("Rest", "Europe", 
 		scale_linetype_manual(values = lntps)+
 		scale_fill_manual(values = 'grey50')+
 		scale_x_continuous(breaks = brks)+ #,  limits=c(-0.02,  0.022)
-		
 		geom_text(aes(x = x, y = y, label = text), data = subset(metadata_per_cont, Realm == "Terrestrial" ), size = 3)+
 	#	geom_text(aes(x = x, y = y, label = text), data = subset(metadata_per_cont, Realm == "Freshwater" ), size = 3)+
-		
 		theme_classic()+
 		theme(axis.text.y=element_blank(),
 					axis.ticks.y=element_blank(), 
@@ -1004,6 +1047,14 @@ ContMargs$Continent<- factor(ContMargs$Continent, levels = c ("Rest", "Europe", 
 	
 	
 
+	
+	
+	
+	
+	
+# What happens if we merge some datasets that may be considered part of 1 study? 
+	
+# merge Swengel data to 1 dataset: 
 	
 	
 	
