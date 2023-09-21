@@ -21,12 +21,12 @@ The models were run on a High Performance Cluster, using an array job. The files
 
     'MODEL all biodiversity metrics.R' this is an array script for use on a high performance cluster. it runs all INLA models in the main text (and a few more). Approximate memmory use: 200gb
     'MODEL Continental breakdown' runs the models with continent as additional fixed effect
-    'MODEL all Sensitivity Inla Models' This script runs the models needed to produce the supplementary / extended data graphs. It requires a number of additional input dataframes that are created in the script XXXXXXXX
+    'MODEL all Sensitivity Inla Models' This script runs the models needed to produce the supplementary / extended data graphs. It requires a number of additional input dataframes that are created in the script 'GRAPHS Sensitivity analyses.R'
     'MODEL inla Population Models' rund all population models, including those to estimate the expected RtM effect
 
 Making the graphs: 
 
-    'GRAPHS Fig 1 conceptual figure.R' This makes teh graphs in the conceptual figure of Box 1
+    'GRAPHS Fig 1 conceptual figure.R' This makes the graphs in the conceptual figure of Box 1
     'GRAPHS models main text and part of Extended Data.R' This script takes the output files of the models and plots them to produce the graphs in the main text and
     a few Extended Data Figures
     'GRAPHS Sensitivity analyses' Makes the files and plots the graphs of the sensitivity analyses, as available in the Extended Data 
