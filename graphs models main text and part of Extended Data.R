@@ -961,7 +961,7 @@ data.frame('Initial_abundance_interval' = c( '<20%',
 # all data, all years ( to be corrected for final plots)
 # commonness assigned in relation to highest value in Year 1
 pop1sum <- as.data.frame(readRDS("inlaPop1T1SUMMARY.rds"))[ 2, ]#
-pop2sum <- as.data.frame(readRDS("inlaPop2T1SUMMARYNoAR.rds"))[ 2, ]
+pop2sum <- as.data.frame(readRDS("inlaPop2T1SUMMARY.rds"))[ 2, ]
 pop3sum <- as.data.frame(readRDS("inlaPop3T1SUMMARY.rds"))[ 2, ]
 pop4sum <- as.data.frame(readRDS("inlaPop4T1SUMMARY.rds"))[ 2, ]
 pop5sum <- as.data.frame(readRDS("inlaPop5T1SUMMARY.rds"))[ 2, ]
@@ -1018,11 +1018,11 @@ pop1Marg$CG<- "1-20% \n(very rare)"
 pop1Marg$xc <- pop1Marg$x + corr1CG1 # apply correction factor to whole posterior
 pop1rand<- readRDS("inlaPop1T1allRandomSlopes.rds" )
 
-pop2sum <- as.data.frame(readRDS("inlaPop2T1SUMMARYNoAR.rds"))[ 2, ]
-pop2Marg<- readRDS("inlaPop2T1MarginalNoAR.rds" )
+pop2sum <- as.data.frame(readRDS("inlaPop2T1SUMMARY.rds"))[ 2, ]
+pop2Marg<- readRDS("inlaPop2T1Marginal.rds" )
 pop2Marg$CG<- "20-40%"
 pop2Marg$xc <-  pop2Marg$x + corr1CG2
-pop2rand<- readRDS("inlaPop2T1allRandomSlopesNoAR.rds" )
+pop2rand<- readRDS("inlaPop2T1allRandomSlopes.rds" )
 
 pop3sum <- as.data.frame(readRDS("inlaPop3T1SUMMARY.rds"))[ 2, ]
 pop3Marg<- readRDS("inlaPop3T1Marginal.rds" )
