@@ -3,6 +3,17 @@ library(ggnewscale)
 library(tidyverse)
 library(data.table)
 library(reshape2)
+# set theme and color scheme for figures	
+theme_clean<- theme_grey() + theme(panel.grid.major = element_blank(), 
+																	 panel.grid.minor = element_blank(),
+																	 panel.background = element_blank(), 
+																	 axis.line = element_line(colour = "black") , 
+																	 legend.key=element_blank())
+
+shps<- c("Freshwater" = 24, "Terrestrial" = 21 )#, "Both realms" = 22)
+col.scheme.global<- c(  "Global"  = "grey10", "Observed" = "grey70")  #
+col.scheme.black<- c(  "Global"  = "black", "Observed" = "black")  #
+sz = 0.5
 col.scheme.realm<-c(  "Freshwater"  = "dodgerblue2", "Terrestrial" = "chocolate4")
 col.scheme.realm2 <- c(  "Freshwater"  = "dodgerblue2", "Freshwater2"  = "dodgerblue2",  "Terrestrial" = "chocolate4", "Terrestrial2" = "chocolate4")
 lntps<-  c("Terrestrial" = 2,  "Freshwater" = 3)
@@ -14,27 +25,7 @@ taxa<-read.csv( file = "C:\\Dropbox\\Insect Biomass Trends/csvs/taxa5.2.csv"); d
 load("C:\\Dropbox\\Insect Biomass Trends/csvs/completeData2023pure.Rdata"); dim(completeData2023pure) # 
 
 # exclude plots with a trend in taxonomic resolution: 
-bad_tax<- 
-	c(849L, 132L, 1442L, 1527L, 10001L, 10003L, 10005L, 10006L, 10007L, 10008L, 10009L, 10011L, 10012L, 10015L, 10016L, 10017L, 10018L, 
-		10019L, 10021L, 10024L, 10025L, 10026L, 10028L, 10029L, 10032L, 10033L, 10034L, 10035L, 10036L, 10038L, 10039L, 10044L, 10048L, 
-		10049L, 10051L, 10052L, 10056L, 10057L, 10058L, 10059L, 10063L, 10066L, 10067L, 10068L, 10070L, 10072L, 10075L, 10079L, 10080L, 
-		10081L, 10082L, 10084L, 10085L, 10087L, 10092L, 10093L, 10097L, 10099L, 10106L, 10108L, 10113L, 10114L, 10115L, 10119L, 10124L, 
-		10125L, 10127L, 10128L, 10130L, 10135L, 10137L, 10138L, 10145L, 10146L, 10147L, 10149L, 10158L, 10160L, 10163L, 10164L, 10165L, 
-		10168L, 10169L, 10170L, 10171L, 10173L, 10175L, 10178L, 10180L, 10181L, 10182L, 10185L, 10187L, 10188L, 10189L, 10192L, 10193L, 
-		10195L, 10196L, 10198L, 10349L, 10200L, 10201L, 10204L, 10206L, 10208L, 10212L, 10215L, 10216L, 10219L, 10221L, 10223L, 10224L, 
-		10225L, 10226L, 10227L, 10229L, 10230L, 10233L, 10236L, 10249L, 10250L, 10252L, 10253L, 10254L, 10255L, 10256L, 10257L, 10258L, 
-		10259L, 10277L, 10279L, 10280L, 10281L, 10282L, 10283L, 10284L, 10285L, 10286L, 10287L, 10289L, 10290L, 10291L, 10292L, 10294L, 
-		10295L, 10297L, 10298L, 10299L, 10301L, 10302L, 10303L, 10304L, 10305L, 10306L, 10307L, 10308L, 10309L, 10311L, 10312L, 10313L, 
-		10314L, 10315L, 10316L, 10317L, 10318L, 10320L, 10321L, 10322L, 10323L, 10325L, 10326L, 10327L, 10328L, 10329L, 10331L, 10332L, 
-		10334L, 10335L, 10336L, 10337L, 10338L, 10339L, 10340L, 10342L, 10343L, 10344L, 10346L, 10348L, 10469L, 10350L, 10351L, 10352L, 
-		10353L, 10354L, 10355L, 10356L, 10357L, 10361L, 10362L, 10364L, 10365L, 10366L, 10368L, 10369L, 10370L, 10371L, 10373L, 10374L, 
-		10375L, 10376L, 10378L, 10379L, 10380L, 10381L, 10382L, 10383L, 10384L, 10385L, 10386L, 10387L, 10388L, 10389L, 10390L, 10391L, 
-		10392L, 10393L, 10394L, 10395L, 10398L, 10399L, 10400L, 10401L, 10403L, 10404L, 10407L, 10408L, 10409L, 10410L, 10412L, 10413L, 
-		10414L, 10415L, 10416L, 10417L, 10418L, 10419L, 10421L, 10422L, 10424L, 10425L, 10426L, 10427L, 10428L, 10429L, 10430L, 10431L, 
-		10432L, 10433L, 10434L, 10435L, 10436L, 10437L, 10438L, 10439L, 10475L, 10440L, 10441L, 10442L, 10443L, 10444L, 10445L, 10446L, 
-		10448L, 10449L, 10485L, 10452L, 10454L, 10455L, 10457L, 10458L, 10459L, 10460L, 10463L, 10464L, 10465L, 10467L, 10468L, 10470L, 
-		10474L, 10499L, 10491L, 10490L, 10498L, 10489L, 10506L, 10503L, 10511L, 10504L, 10500L, 10501L)
-
+bad_tax<- 	c(849L, 132L, 1442L, 1527L)
 completeData2023pure<- completeData2023pure[!completeData2023pure$Plot_ID %in% bad_tax, ]
 
 dim(completeData2023pure)
@@ -53,8 +44,6 @@ completeData2023pure<- completeData2023pure[!completeData2023pure$Datasource_ID 
 completeData2023pure<- completeData2023pure[!completeData2023pure$Plot_ID %in% exptPlots, ]
 completeData2023pure<- subset(completeData2023pure, Datasource_ID != 1353 & Datasource_ID != 1402) # remove ant bait and russian springtails
 
-completeData2023pure<- subset(completeData2023pure, Datasource_ID != 1353 & Datasource_ID != 1402 )
-
 
 plots<-as.data.frame(fread( file = "C:\\Dropbox\\Insect Biomass Trends/csvs/PlotData 5.0.csv")); dim(plots)
 UKfwPlots<- read.csv( file = "C:\\Dropbox\\Insect Biomass Trends/csvs/UKfwSites.csv")
@@ -64,148 +53,9 @@ figure_path<- "D:/work/2017 iDiv/2018 insect biomass/insect-richness-trends/Figu
 completeData2023<- completeData2023pure
 
 
-# make explanatory figure for SAD intervals#####
-# fig  Methods / under Fig 4 and S4 
-Biotime <- read.csv( file = "C:\\Dropbox\\Insect Biomass Trends/csvs/BioTIMEstd2023.csv"); unique(Biotime$Datasource_name)
-
-uk<- subset(Biotime, Datasource_name == "BT380 UK chalk grassland butterflies"  )
-dk<- subset(Biotime, Datasource_name == "BT249 DK lighttrap"  )
-cc<- subset(Biotime, Datasource_name == "BT313 Cedar cr grasshoppers"  )
-
-hist(log10(dk$Number+1))
-quartiles<- quantile(log10(dk$Number+1))
-
-hist(log10(cc$Number+1))
-hist(cc$Number)
-quantile(log10(cc$Number+1))
-table((cc$Number+1))
-
-max(log10(cc$Number+1))
 
 
-
-data<- cc
-data<- dk
-
-yrMax<- dk$Year[which(dk$Number == max(dk$Number))]
-yrMin<- 1999
-
-dkMax<- subset(dk, Year == yrMax)
-dkMin<- subset(dk, Year == yrMin)
-quartiles<- quantile(log10(dkMax$Number+1))
-
-dkBoth<- rbind(dkMin, dkMax )
-dkBoth$Year[dkBoth$Year == 2006] <- 'Year 1'
-dkBoth$Year[dkBoth$Year == 1999] <- 'Year 10'
-
-# base figure of SAD
-ggplot(dkBoth,  aes(log10(Number), group = (Year), fill = (Year)),alpha = 0.5)+
-	geom_histogram(position = "identity", alpha = 0.5, bins = 9)+
-	ylab('Number of species')+
-	geom_vline(xintercept = 0, color = 'red')+
-	geom_vline(xintercept = quartiles[2], color = 'red')+
-	geom_vline(xintercept = quartiles[3], color = 'red')+
-	geom_vline(xintercept = quartiles[4], color = 'red')+
-	geom_vline(xintercept = quartiles[5], color = 'red')+
-geom_vline(xintercept = max(log10(dkMax$Number)), col="blue")+
-	geom_vline(xintercept=max(log10(data$Number)*0.8), col="blue")+
-geom_vline(xintercept=max(log10(data$Number)*0.6), col="blue")+
-geom_vline(xintercept=max(log10(data$Number)*0.4), col="blue")+
-geom_vline(xintercept=max(log10(data$Number)*0.2), col="blue")	+
-		theme_clean
-
-ggsave(filename = "Fig S1 SAD sections expl pt1.png" , path = figure_path, width = 12, height = 10,  units = "cm",dpi = 300, device = "png")
-ggsave(filename = "Fig S1 SAD sections expl pt1.pdf" , path = figure_path, width = 12, height = 10,  units = "cm",dpi = 300, device = "pdf")
-
-
-
-
-
-pvt<- reshape2::dcast(subset(dk, Year %in% c(1999, 2006)),  Year ~ Taxon , value.var = "Number", sum)
-
-dim(pvt)
-rowSums(pvt>0)
-
-alpha<- 	calculate_alpha_metrics(pvt) 
-
-
-sel<- subset(alpha, Unit_in_data %in% c('logNr020','logNr2040','logNr4060','logNr6080','logNr80100' ))
-sel$SADSection<- rep(c("0-20%", "20-40%",  "40-60%", "60-80%", "80-100%" ), each = 2)
-sel$Year[sel$Year == 2006] <- 'Year 1'
-sel$Year[sel$Year == 1999] <- 'Year 10'
-sel<- arrange(sel, Year)
-
-# bar chart 
-ggplot(sel,	 aes(SADSection, Number, fill = (Year)))+
-	geom_col(position = "identity", alpha = 0.5)+
-	ylab('Number of species')+
-	xlab('SAD interval (equal spacing)')+
-	ggtitle('Equally spaced SAD sections')+
-	theme_clean+
-	theme(legend.position="none")
-
-ggsave(filename = "Fig S1 SAD sections expl pt2.png" , path = figure_path, width = 11, height = 10,  units = "cm",dpi = 300, device = "png")
-ggsave(filename = "Fig S1 SAD sections expl pt2.pdf" , path = figure_path, width = 11, height = 10,  units = "cm",dpi = 300, device = "pdf")
-
-#  Quartiles 
-Qs<- quantile(log10(as.matrix(pvt[pvt!= 0])), c(0.25, 0.5, 0.75)) # zeroes were removed
-
-sel<- subset(alpha, Unit_in_data %in% c('logNrQ1','logNrQ2','logNrQ3','logNrQ4' ))
-sel$SADQuartile<- rep(c("1", "2-3",  "4-10", ">10"), each = 2)
-sel$SADQuartile<- ordered(sel$SADQuartile, levels=c("1", "2-3",  "4-10", ">10"))
-sel$Year[sel$Year == 2006] <- 'Year 1'
-sel$Year[sel$Year == 1999] <- 'Year 10'
-
-vec<- c(-0.1, Qs, log10(max(dk$Number)))
-sel$midpoints<- rep(vec[-length(vec)] + diff(vec) / 2, each = 2)
-sel<- arrange(sel, Year)
-wdt<-   rep(diff(c(0.02, Qs, log10(max(dk$Number))))-0.05 ,   2)#/log10(max(dk$Number))
-# bar chatr instead of histogram 
-ggplot(sel,	 aes(midpoints, Number, fill = (Year)))+
-	geom_col(position = "identity", alpha = 0.5, width = wdt)+
-	ylab('Number of species')+
-	xlab('log10(Abundance)')+ 
-	ggtitle('SAD Quartiles with equal species numbers')+
-	theme_clean+
-	theme(legend.position="none")
-
-ggsave(filename = "Fig S1 SAD sections expl pt3.png" , path = figure_path, width = 11, height = 10,  units = "cm",dpi = 300, device = "png")
-ggsave(filename = "Fig S1 SAD sections expl pt3.pdf" , path = figure_path, width = 11, height = 10,  units = "cm",dpi = 300, device = "pdf")
-
-
-
-
-
-
-# old visualization
-hist(log10(dkMax$Number+1), xlab = "log10 (Abundance)", main = "")
-hist(log10(dkMin$Number+1), xlab = "log10 (Abundance)", main = "", col = 'darkgrey', add = T, 
-		 breaks = c(0,0.5,1,1.5,2,2.5,3,3.5,4,4.5))
-# position of quartiles 
-abline(v=quartiles[2], col="red")
-abline(v=quartiles[3], col="red")
-abline(v=quartiles[4], col="red")
-abline(v=quartiles[5], col="red")
-abline(v=quartiles[1], col="red")
-# position of equal prackets 
-
-
-brks<- c(max(log10(data$Number+1)+0.0001),
-				 max(log10(data$Number+1)*0.8),
-				 max(log10(data$Number+1)*0.6),
-				 max(log10(data$Number+1)*0.4),
-				 max(log10(data$Number+1)*0.2), 
-				 0)
-
-
-
-
-# sensitivity analyses #####
-
-
-
-
-# Prep data to test influence of short and long timeseries #######
+# Making needed objects to test influence of short and long timeseries #######
 
 # cut everything down to last 10 years, exclude everything that can't be cut 
 
@@ -269,7 +119,7 @@ saveRDS(completeData2023Short, file = "C:\\Dropbox\\Insect Biomass Trends/csvs/c
 metadata_per_plotZ3<- subset(metadata_per_plotZ, Duration > 20); dim(metadata_per_plotZ3)#549
 length(unique(metadata_per_plotZ3$Datasource_ID)) # 66 datasets
 
-#hypothetically 30 yr cutoff
+#hypothetically 30 yr cutoff (not used)
 metadata_per_plotZ4<- subset(metadata_per_plotZ, Duration > 30); dim(metadata_per_plotZ4)#148
 length(unique(metadata_per_plotZ4$Datasource_ID)) # 29 datasets
 
@@ -279,8 +129,8 @@ completeData2023long <-subset(completeData2023pure, Plot_ID %in% metadata_per_pl
 saveRDS(completeData2023long, file = "C:\\Dropbox\\Insect Biomass Trends/csvs/completeData2023long.rds")
 
 
-# Plot Fig S2 short & long####
-# alldata
+# After analysis in an HPC, this will create figure ED2
+# ED Fig 2 short & long####
 inlaRichSum<- as.data.frame(readRDS("inlaRichnessTSUMMARY.rds"))
 richMarg<- readRDS("inlaRichnessTMarginal.rds")
 richMarg$Metric<- "Richness"
@@ -326,19 +176,20 @@ inlaPieShortMarg<- readRDS("sensitivity analysis/inlaENSPIEShortTMarginal.rds" )
 inlaPieShortMarg$Metric<- "Simpson diversity (ENS)"
 inlaPieShortMarg$Data<- "10 years"
 
-
+# bind needed objects together
 univar<- rbind(abMarg, richMarg, pieMarg,  inlaAbLongMarg, inlaRichLongMarg, inlaPieLongMarg, 
 							 inlaAbShortMarg, inlaRichShortMarg, inlaPieShortMarg)
 univar$Metric<- factor(univar$Metric, levels = c ("Abundance", "Richness", "Simpson diversity (ENS)" ))
 univar$Data<- factor(univar$Data, levels = c ("All", "20 years", "10 years" ))
 
+# remove very low values (which lead to very long tails)
 univar<- subset(univar, y> 1)
 
 brks<- c(-0.02, -0.01, -0.005, 0, 0.005, 0.01, 0.02, 0.03, 0.04)
 perc<-(10^(brks )  *100) - 100
 l<- paste(brks, paste0(round(perc,1), "%"),sep = "\n")
 
-
+# new labels
 data_labs<- c( "All",  ">19 years data", "Last 10 years data" )
 names(data_labs)<- c("All", "20 years", "10 years")
 
@@ -346,8 +197,8 @@ mean <- univar %>%
 	group_by(Realm, Metric ,Data) %>%
 	filter(y == max(y, na.rm=TRUE))
 
+# make fig ED 2
 ggplot(univar, aes(x = x, y = y))+
-	#	geom_line( )+
 	geom_area(  aes(x = x, y = y80, fill = Realm), alpha = 0.8)+
 	geom_area(  aes(x = x, y = y90, fill = Realm), alpha = 0.6)+
 	geom_area(  aes(x = x, y = y95, fill = Realm), alpha = 0.3)+
@@ -378,7 +229,7 @@ ggsave(filename = "Van Klink ED Fig 2 timeseries length.png" , path = figure_pat
 
 
 
-#  Prep data to test effect of large datasets (large number of plots):  #####
+#  Create needed objects to test effect of large datasets (large number of plots):  #####
 
 
 metadata_per_dataset<-  completeData2023pure %>% 
@@ -403,21 +254,21 @@ metadata_per_dataset<-  completeData2023pure %>%
  ggplot(metadata_per_dataset, aes(x = Datasource_name , y = Number_of_plots))+
 	          geom_point()+ coord_flip()+ facet_wrap(.~Realm)
  hist(metadata_per_dataset$Number_of_plots)
- median(metadata_per_dataset$Number_of_plots)#3
- mean(metadata_per_dataset$Number_of_plots) # 8.6
+ median(metadata_per_dataset$Number_of_plots)#
+ mean(metadata_per_dataset$Number_of_plots) # 
 
  #visualize how many plots there are in datasets 
  ggplot(subset(metadata_per_dataset, Number_of_plots >5),
  			 aes(x = Datasource_name , y = Number_of_plots))+
  	geom_point()+ coord_flip()+ facet_wrap(.~Realm)+
  scale_y_log10()+
- 		geom_hline(yintercept = 20)+# 25 datasets
+ 		geom_hline(yintercept = 20)+# 
  geom_hline(yintercept = 50)+
  geom_hline(yintercept = 10)
  
  
- nrow(subset(metadata_per_dataset, Number_of_plots >10)) # 31
- nrow(subset(metadata_per_dataset, Number_of_plots >50)) # 6
+ nrow(subset(metadata_per_dataset, Number_of_plots >10)) # 
+ nrow(subset(metadata_per_dataset, Number_of_plots >50)) # 
  
  metadata_per_plot<-  completeData2023pure %>% 
  	group_by(Plot_ID) %>%
@@ -442,7 +293,7 @@ metadata_per_dataset<-  completeData2023pure %>%
  		Number_of_samples = length(unique(paste(Year, Period))),
  		Number_of_years = length(unique(Year))
  	)
- dim(metadata_per_plot) # 923
+ dim(metadata_per_plot) #
  str(metadata_per_plot)
  length(unique(completeData2023pure$Plot_ID))# same
  subset(metadata_per_plot, Datasource_ID == '79')
@@ -450,7 +301,7 @@ metadata_per_dataset<-  completeData2023pure %>%
  
  
  
-# loop for selecting 10, 20 or 50 plots from each dataset that has
+# loop for selecting 10, 20 or 50 plots from each dataset
  
  for ( q in c(1:3)){
 		  maxNrPlots<- 	c(10,20,50)[q]
@@ -465,10 +316,6 @@ metadata_per_dataset<-  completeData2023pure %>%
 		badDatasets<- badDatasets[badDatasets %in% completeData2023pure$Datasource_ID]
 		 
 		
-		
-		
-		
-		
 		# for each dataset with over maxNrPlots: 
 		selectedPlots<- NULL
 		
@@ -478,8 +325,6 @@ metadata_per_dataset<-  completeData2023pure %>%
 		smpPltsPerDataset<- NULL
 			
 		dataset<- badDatasets[i]
-		#dataset <-1267 # sweden as testcase # done 
-		
 		
 		
 		dat1<- subset(completeData2023bad, Datasource_ID == dataset)
@@ -511,7 +356,7 @@ metadata_per_dataset<-  completeData2023pure %>%
 	cat(paste( "Dataset",  badDatasets[i], unique(dat1$Datasource_name), ":",  nLocs, "Locs:",length(smpPltsPerDataset), "plots" , "\r\n"))
 									}
 							
-# 
+# try to take the spatial spread of the data into account: take one site per location if possible. 
 
 				if (nLocs != 1 & nLocs< maxNrPlots ){
 		  	# take the n (maxNrPlots / nLocations) plots with longest timeseries and the highest total N from each loc (probably correlated)
@@ -667,8 +512,8 @@ metadata_per_dataset<-  completeData2023pure %>%
 }				
 				dim(cDfixed) #works
 
-
-# Plot Fig S3 number of sites####
+# after analysis, plot figure S3
+# ED Fig 3 number of sites####
 #	get standard model outputs: Abundance, richness, pie. 
 
 	inlaRichSum<- as.data.frame(readRDS("inlaRichnessTSUMMARY.rds"))
@@ -781,12 +626,13 @@ metadata_per_dataset<-  completeData2023pure %>%
 	
 	
 				
-# Plot Fig S5 quartiles #####
+# Plot ED Fig 5 quartiles #####
 # Quartiles based on distribution of abundance values (0.25, median, 0.75)
 sads<- subset(completeData2023pure, Unit ==  "logNrQ1" |  Unit ==   "logNrQ2"|  Unit == "logNrQ3" |  Unit == "logNrQ4")
 piv<- dcast(subset(sads, !is.na(Number)), Plot_ID+ Year ~ Unit, value.var = "Number", mean)
 pivot_wider(sads, id_cols = Plot_ID, from = Unit, values_from = Number, values_fn = mean)
 
+#load output from models
 quart1<- as.data.frame(readRDS("quartile1TSUMMARY.rds"))
 q1Marg<- readRDS("quartile1TMarginal.rds" )
 q1Marg$Metric<- "Quartile 1"
@@ -826,7 +672,6 @@ l<- paste(brks, paste0(round(perc,1), "%"),sep = "\n")
 col.scheme.realm2<- c(Terrestrial = "grey50",  Terrestrial2 = "grey50")
 
 ggplot(subset(quartilesData, y>1 | y< -1 ), aes(x = x, y = y))+
-	#	geom_line( )+
 	geom_area(  aes(x = x, y = y80, fill = Realm), alpha = 0.8)+
 	geom_area(  aes(x = x, y = y90, fill = Realm), alpha = 0.6)+
 	geom_area(  aes(x = x, y = y95, fill = Realm), alpha = 0.3)+
@@ -837,7 +682,6 @@ ggplot(subset(quartilesData, y>1 | y< -1 ), aes(x = x, y = y))+
 	ylab ("SAD quartile")+  xlab("Trend slope  \n % change per year")+
 	scale_fill_manual(values = col.scheme.realm2)+
 	scale_x_continuous(breaks = brks,labels = l)+#, limits=c(-0.005,  0.01))+
-	#ggtitle("Number of species per SAD quartile")+
 	theme_classic()+
 	theme(axis.text.x=element_blank(),
 				axis.ticks.x=element_blank(), 
@@ -860,7 +704,7 @@ ggsave(filename = "Fig S5 quartiles.pdf" , path = figure_path, width = 8.9, heig
 				
 				
 				
- # Prep data for effect of bias towards Europe and North America #####
+ # Create data needed to test effect of bias towards Europe and North America #####
 			
 			metadata_per_datasetX<- subset(completeData2023pure, Unit == "richness") %>% 
 				group_by(Datasource_ID) %>%
@@ -925,10 +769,6 @@ metadata_per_cont$y[metadata_per_cont$Continent == "Rest"] <- 200
 
 metadata_per_cont$Continent<- factor(metadata_per_cont$Continent, levels = c ("Rest", "Europe", "North America"   ))
 
-# not used: 
-contPIESum<- as.data.frame(readRDS("sensitivity analysis/inlaENSPIEFixContTSUMMARY.rds"))
-contAbSum<- as.data.frame(readRDS("sensitivity analysis/inlaAbundFixContTSUMMARY.rds"))
-contRichSum<- as.data.frame(readRDS("sensitivity analysis/inlaRichFixContTSUMMARY.rds"))
 
 # used
 cont2PIESum<- as.data.frame(readRDS("sensitivity analysis/inlaENSPIEFixCont2TSUMMARY.rds"))
@@ -940,7 +780,7 @@ cont2Richmarg<-   (readRDS("sensitivity analysis/inlaRichFixCont2TMarginal.rds")
 
 
 
-# Plot Fig S9 continents #####
+# Plot ED Fig 9 geographical bias #####
 
 metrics <- c("Abundance", "Richness", "ENSPIE" )	
 marginals<- list(cont2Abmarg, cont2Richmarg, cont2PIEmarg)
@@ -1050,104 +890,3 @@ ContMargs$Continent<- factor(ContMargs$Continent, levels = c ("Rest", "Europe", 
 	
 	
 	
-	
-	
-# What happens if we merge some datasets that may be considered part of 1 study? 
-	
-# merge Swengel data to 1 dataset: 
-	
-	
-	
-	
-
-
-
-
-
-
-
-
-
-
-
-#  NOT USED: Taxonomic resolution #####
-
-
-
-raw3<- readRDS(file = "rawInsectsForRichnessAggregatedPerYear.RDS")
-raw3ab<- subset(raw3, Unit_in_data == "abundance")
-
-plots<-read.csv( file = "C:\\Dropbox\\Insect Biomass Trends/csvs/PlotData 5.0.csv"); dim(plots)
-UKfwPlots<- read.csv( file = "C:\\Dropbox\\Insect Biomass Trends/csvs/UKfwSites.csv")
-plots<- rbind(plots[, names(UKfwPlots)], UKfwPlots)
-
-
-length(unique(raw3ab$Plot_ID))		
-
-# plots with > 2 years: 	
-
-
-plts<- unique(raw3ab$Plot_ID)
-
-ps<- NULL
-for(i in 1:length(plts)){
-	
-	dat<- 	subset(raw3ab, Plot_ID == plts[i])
-	dim(dat)
-	length(unique(dat$Year))
-	sum<- summary(lm(Rank ~ Year, data = dat))
-	
-	p<- data.frame( Plot_ID = plts[i],
-									Datasource_ID = unique(dat$Datasource_ID), 
-									Slope_est = sum$coefficients[2,1],
-									p = sum$coefficients[2,4])
-	
-	ps<- rbind(ps, p)
-	
-}
-
-hist(ps$p)
-hist(ps$Slope_est)
-sum(ps$p<0.05 & ps$Slope_est>0, na.rm = T) # 301, that's more than the expected 63
-sum(ps$p<(0.05/1269)& ps$Slope_est>0, na.rm = T) #174 seem to have a real slope 
-
-
-plotsWithSlope<- subset(ps, p<(0.05/1269) & Slope_est>0)
-
-merge(plotsWithSlope, studies[, c("Datasource_ID", "Datasource_name")])
-
-
-for(i in 1:20){
-	
-	plt<- plotsWithSlope$Plot_ID[i]
-	dat<- 	subset(raw3ab, Plot_ID == plt)
-	
-	sum<- summary(lm(Rank ~ Year, data = dat))
-	p = sum$coefficients[2,4]
-	
-	print(
-		ggplot(dat, aes(x = Year, y = Rank))+
-			geom_point()+
-			stat_smooth(method = 'lm')+ 
-			ggtitle(paste(plt, "p =", p))
-	)
-}
-
-
-
-sum(ps$p<(0.05)& ps$Slope_est>0, na.rm = T) #174 seem to have a real slope 
-
-
-plotsWithWeakerSlope<- subset(ps, p<(0.05) & Slope_est>0)
-
-merge(plotsWithWeakerSlope, studies[, c("Datasource_ID", "Datasource_name")])
-
-table(merge(plotsWithWeakerSlope, studies[, c("Datasource_ID", "Datasource_name")])$Datasource_name)
-
-
-
-bad_tax<- plotsWithWeakerSlope$Plot_ID
-
-very_bad_tax<- plotsWithSlope$Plot_ID
-
-
