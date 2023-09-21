@@ -1,13 +1,13 @@
 # final-insect-diversity-trends2
-reproducable code for review for the manuscript called 'Widespread declines of dominant insect species are changing the structure of insect assemblages '
+reproducable code for of 'Disproportionate declines of formerly abundant species underlie insect loss'
 
 files and their functions:
 
 In order of use:
 
-    'load and check data 20221208.R' This will load all the original datafiles, clean them and arrange them so, as to produce the datafram on which all main analyses are done. The raw data files are only partially provided on KNB, but all results are available in the file "completedata202021pure.rds".
-    Better is to use the files 'Supplementary Data 1.rds' for the biodiversity metrics and 'Supplementary Data 2.rds' for the population analyses 
-    as supplied as suppementary data files. These are cleaned and ready for use in models. 
+    'load and check data 20221208.R' This will load all the original datafiles, clean them and arrange them so, as to produce the datafram on which all main analyses are done. The raw data files are only partially provided on KNB, but the end result of this code is available in the file Supplementary Data 1 and Supplementary Data 2.
+     
+     
 
 Functions:
 
@@ -17,6 +17,7 @@ Functions:
     FUNCTION 'FUNCTION add zeroes.R' # this script adds 0 counts for all taxa that were not observed in a given year, but were present in other years
 
 Models: 
+The models were run on a High Performance Cluster, using an array job. The files of the models run are supplied as 'metrics.csv' (biodiversity models)  'popModels.csv' (population models), 'sensitivityanalyses.csv' (for the majority of sensitivity analyses), and 'sensitivityContinent.csv'   
 
     'MODEL all biodiversity metrics.R' this is an array script for use on a high performance cluster. it runs all INLA models in the main text (and a few more). Approximate memmory use: 200gb
     'MODEL Continental breakdown' runs the models with continent as additional fixed effect
@@ -26,12 +27,12 @@ Models:
 Making the graphs: 
 
     'GRAPHS Fig 1 conceptual figure.R' This makes teh graphs in the conceptual figure of Box 1
-    'graphs models main text and part of Extended Data.R' This script takes the output files of the models and plots them to produce the graphs in the main text and
+    'GRAPHS models main text and part of Extended Data.R' This script takes the output files of the models and plots them to produce the graphs in the main text and
     a few Extended Data Figures
     'GRAPHS Sensitivity analyses' Makes the files and plots the graphs of the sensitivity analyses, as available in the Extended Data 
     
 
-Dependencies: map_preparation.R # a script for preparing the map properties for plotting. Not supplied. 
+Dependencies: map_preparation.R # a script for preparing the map properties for plotting. Not supplied. This code will be defunct with the retirement of several dependent packages
 
 other files: 
 Greenland data processing rarefaction 2021.R This file contains the processing code for the Greenland data, which may not be shared in a derived form.
