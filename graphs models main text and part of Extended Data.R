@@ -1444,36 +1444,39 @@ randomSlopes$Realm2<- "Terrestrial"
 
 
 # random slopes of population models and total abundance models #####
+pop0rand<- readRDS("inlaPop0TrandomSlopes.rds" )
 pop1rand<- readRDS("inlaPop1T1randomSlopes.rds" )
 pop2rand<- readRDS("inlaPop2T1randomSlopes.rds" )
 pop3rand<- readRDS("inlaPop3T1randomSlopes.rds" )
 pop4rand<- readRDS("inlaPop4T1randomSlopes.rds" )
 pop5rand<- readRDS("inlaPop5T1randomSlopes.rds" )
 
-pop5rand$pop5Slope<- pop5rand$slope
-pop5rand$pop5SlopeSD<- pop5rand$`DataID_Slope_ sd`
-pop4rand$pop4Slope<- pop4rand$slope
-pop4rand$pop4SlopeSD<- pop4rand$`DataID_Slope_ sd`
-pop3rand$pop3Slope<- pop3rand$slope
-pop3rand$pop3SlopeSD<- pop3rand$`DataID_Slope_ sd`
-pop2rand$pop2Slope<- pop2rand$slope
-pop2rand$pop2SlopeSD<- pop2rand$`DataID_Slope_ sd`
-pop1rand$pop1Slope<- pop1rand$slope
-pop1rand$pop1SlopeSD<- pop1rand$`DataID_Slope_ sd`
+pop5rand$pop5Slope<- pop5rand$slope + corr1CG5
+pop5rand$pop5SlopeSD<- pop5rand$`DataID_Slope_ sd` + corr1CG5
+pop4rand$pop4Slope<- pop4rand$slope + corr1CG4
+pop4rand$pop4SlopeSD<- pop4rand$`DataID_Slope_ sd` + corr1CG4
+pop3rand$pop3Slope<- pop3rand$slope + corr1CG3
+pop3rand$pop3SlopeSD<- pop3rand$`DataID_Slope_ sd` + corr1CG3
+pop2rand$pop2Slope<- pop2rand$slope + corr1CG2
+pop2rand$pop2SlopeSD<- pop2rand$`DataID_Slope_ sd` + corr1CG2
+pop1rand$pop1Slope<- pop1rand$slope + corr1CG1
+pop1rand$pop1SlopeSD<- pop1rand$`DataID_Slope_ sd` + corr1CG1
 
 
 randomSlopes4<- merge(pop5rand[, c( "Datasource_ID", "Datasource_name",  "pop5Slope", "pop5SlopeSD") ],  
-											pop4rand[, c( "Datasource_ID", "Datasource_name",  "pop4Slope", "pop4SlopeSD")])
+											pop4rand[, c( "Datasource_ID", "Datasource_name",  "pop4Slope", "pop4SlopeSD")]) ;dim(randomSlopes4)
 randomSlopes4<- merge(randomSlopes4,  pop3rand[, c( "Realm", "Datasource_ID", "Datasource_name", "pop3Slope", "pop3SlopeSD")], all = T)
-randomSlopes4<- merge(randomSlopes4,  pop2rand[, c( "Realm", "Datasource_ID", "Datasource_name", "pop2Slope", "pop2SlopeSD")], all = T)
-randomSlopes4<- merge(randomSlopes4,  pop1rand[, c( "Realm", "Datasource_ID", "Datasource_name",  "pop1Slope", "pop1SlopeSD")], all = T)
-randomSlopes4<- merge(randomSlopes4,  pop0rand[, c( "Realm", "Datasource_ID", "Datasource_name",  "pop0Slope", "pop0SlopeSD")], all = T)
+randomSlopes4<- merge(randomSlopes4,  pop2rand[, c( "Datasource_ID",  "pop2Slope", "pop2SlopeSD")], all = T);dim(randomSlopes4)
+randomSlopes4<- merge(randomSlopes4,  pop1rand[, c( "Datasource_ID",   "pop1Slope", "pop1SlopeSD")], all = T);dim(randomSlopes4)
+#randomSlopes4<- merge(randomSlopes4,  pop0rand[, c( "Realm", "Datasource_ID", "Datasource_name",  "pop0Slope", "pop0SlopeSD")], all = T);dim(randomSlopes4)
+randomSlopes4[duplicated(randomSlopes4$Datasource_ID), ] # no duplicates
+
 
 # rename realms for fig 
 randomSlopes4$Realm2<-"Terrestrial"
 # assign labels: 
 
-labs<- c(
+labs<- c(#'pop0Slope' = 'Absent at start', 
 	'pop1Slope' = '<20%', 
 	'pop2Slope' = '20-40%',
 	'pop3Slope' = '40-60%', 
@@ -1484,10 +1487,12 @@ labs<- c(
 
 
 
-randomSlopes5<- merge(randomSlopes, randomSlopes4, all = T); dim(randomSlopes5)
+randomSlopes5<- merge(randomSlopes[, c('Datasource_ID',  'richnessSlope', 'richnessSlopeSD', 'abundanceSlope', 'abundanceSlopeSD',   'enspieSlope')], randomSlopes4, all = T); dim(randomSlopes5)
+nrow(randomSlopes5) == nrow(randomSlopes)
+randomSlopes5[duplicated(randomSlopes5$Datasource_ID), ]
 
 
-# better plot: 
+# better plot: 'pop0Slope',
 rs5<- reshape2::melt(randomSlopes5, id.vars = c('Realm',  'Datasource_ID', 'Datasource_name','richnessSlope', 'abundanceSlope', 'enspieSlope'),
 										 measure.vars = c( 'pop1Slope', 'pop2Slope','pop3Slope', 'pop4Slope',  'pop5Slope'   ) , variable.name = 'Metric' , value.name = 'Random slope')
 
@@ -1511,6 +1516,8 @@ for(i in 1:(length(unique(rs5$Metric)))){
 }
 
 regressions
+# slopes get steeper towards higher abundance classes, but interestingly also for absent species 
+# i.e places with more positive abundance slopes have less negative bracket 5 populations, and more positive colonizing species 
 
 # Make Extened Data Fig 8 relation between population slopes and total abundances slope #####
 ggplot(rs5, aes(x =populationPerc, y = abundancePerc ))+
