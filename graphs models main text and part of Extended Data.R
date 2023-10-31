@@ -102,7 +102,7 @@ allPops<- subset(allPops, Realm == 'Terrestrial'); dim(allPops)
 
 
 
-# make Supplementary data 1####
+# make Supplementary data 1 (on Zenodo)####
 dim(completeData2023)
 unique(completeData2023$Unit)
 completeData2023SelectedMetrics<- completeData2023[ completeData2023$Unit %in% c("abundance", "richness",  "rarefiedRichness",     "Shannon", "ENSPIE", "coverageRichness.8" ,  # Fig 1
@@ -158,7 +158,7 @@ length(unique(subset(completeData2023, Realm == "Terrestrial")$Plot_ID)	) # tota
 
 
 
-# make Extended Data Table 1: Data availability: #####
+# make Supplementary Table 1: Data availability: #####
 length(unique(completeData2023$Datasource_ID))
 length(unique(completeData2023$Plot_ID))
 
@@ -178,7 +178,7 @@ tabS1<- metadata_metrics[metadata_metrics$Unit %in% c("abundance", "richness", "
 tabS1[c(1,6,3,5,2, 4),]
 
 
-# make Extended Data Table 5 (all studies)#####
+# make Supplementary Table 4 (all studies)#####
 metadata_per_dataset <-subset(completeData2023, Realm == "Terrestrial") %>% 
 	group_by(Datasource_ID) %>%
 	summarise(
@@ -271,7 +271,7 @@ write.csv(tableS5, file = "Table S5.csv")
 
 
 
-# make Extended data table 2 #####
+# make Supplementary Table 2 #####
 table2<- t(rbind(
 	apply(metadata_per_dataset[,c('Nb_plots','Time_span_yrs','Nr_yrs_data','Start','End')],2, min ), 
 	apply(metadata_per_dataset[,c('Nb_plots','Time_span_yrs','Nr_yrs_data','Start','End')],2, median ), 
@@ -398,7 +398,7 @@ cDrarRichReduced	<- subset(cDrarRichness , Datasource_ID %in% topNotch); dim(cDr
 
 
 
-# make Extended Data Table 3  continental breakdown ####
+# make Supplementary Table 3  continental breakdown ####
 metadata_abundance<- cDabund %>%
 	group_by (Datasource_ID, Datasource_name) %>%
 	summarise(
@@ -948,7 +948,7 @@ corr3CG4 <- hq4cens3$mean - hq4$mean
 corr3CG5 <- hq5cens3$mean - hq5$mean
 
 
-# make Extended Data Table 4 #####
+# make supplementary Table 5 #####
 data.frame('Initial_abundance_interval' = c( '<20%', 
 																						 '20-40%', '40-60%', '60-80%', '80-100%' ), 
 					 '1_year_censoring' = c( corr1CG1, 
@@ -1508,6 +1508,8 @@ for(i in 1:(length(unique(rs5$Metric)))){
 	dat<- subset(rs5, Metric == Met & !is.na(`Random slope`)  ) 
 	mod<- summary(lm(abundancePerc~ populationPerc , data = dat))
 	reg<- cbind(Metric = Met, 
+							Min = min(dat$populationPerc),
+							Max = max(dat$populationPerc),
 							intrcpt = mod$coefficients[1,1 ],
 							as.data.frame(mod$coefficients)[2, ])
 	reg$sign<- ""
@@ -1516,18 +1518,29 @@ for(i in 1:(length(unique(rs5$Metric)))){
 }
 
 regressions
+#calculate start and end point of regression lines
+# for plots where a point has been cut from the graph, replace by xmin:
+regressions$Min[regressions$Min< -16]<- -16
+regressions$ystart<- regressions$intrcpt+ regressions$Min*regressions$Estimate
+regressions$xstart<- regressions$Min
+regressions$yend<- regressions$intrcpt+ regressions$Max*regressions$Estimate
+regressions$xend<- regressions$Max
+
+
+
 # slopes get steeper towards higher abundance classes, but interestingly also for absent species 
 # i.e places with more positive abundance slopes have less negative bracket 5 populations, and more positive colonizing species 
 
-# Make Extened Data Fig 8 relation between population slopes and total abundances slope #####
+# Make Extened Data Fig 8a relation between population slopes and total abundances slope #####
 ggplot(rs5, aes(x =populationPerc, y = abundancePerc ))+
-	geom_point(size = 1)+
+	geom_point(size = 0.75, color = 'black')+
 	facet_wrap(vars(Metric), nrow = 1, labeller = labeller(Metric = labs))+#, scales = 'free_x')+
 	geom_hline(yintercept=0, linetype = "dashed")+
 	geom_vline(xintercept=0, linetype = "dashed")+
 	geom_abline(intercept = 0, slope = 1, linetype = 'dotted')+
-	geom_abline(data = regressions,  aes(intercept = intrcpt  , slope =  Estimate), color = 'blue', size = 0.75)+
-	geom_text(aes(x = -10, y = -10, label = paste('\U03B2 =', round(Estimate, 3), sign)), data = regressions, size = 2.5, color = "black")+
+	#geom_abline(data = regressions,  aes(intercept = intrcpt  , slope =  Estimate), color = 'blue', size = 0.75)+
+	geom_segment(data = regressions, aes(x = xstart, y = ystart, xend= xend, yend = yend), color = 'orange', linewidth = 0.75)+
+	geom_text(aes(x = -10, y = -10, label = paste('\U03B2 =', round(Estimate, 3))), data = regressions, size = 2.5, color = "black")+
 	xlab ('Populations annual % change')+
 	ylab ('Abundance annual % change ')+
 	xlim(c(-16, 11))+ ylim(c(-16, 11))+
