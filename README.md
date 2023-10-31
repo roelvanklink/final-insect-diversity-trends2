@@ -7,6 +7,12 @@ In order of use:
 
     'load and check data 20221208.R' This will load all the original datafiles, clean them and arrange them so, as to produce the datafram on which all main analyses are done. The raw data files are only partially provided on KNB, but the end result of this code is available in the file Supplementary Data 1 and Supplementary Data 2.
      
+Data:
+
+    Supplementary Data 1 # this file contains all biodiversity metrics 
+    Supplementary Data 2 # this file contains all population counts 
+    Supplementary Data 3 # this file contains the population level random effect estimates from the population analysis. 
+    Note: some datasets in all these files have been removed because derived products cannot be shared, and some species names have been obfuscated. 
      
 
 Functions:
