@@ -207,12 +207,12 @@ ggplot(df1, aes(x = Year, y= NumberGraph, group =Species,  color = Scenario))+
 				#axis.text.x  = element_text(angle=45, vjust=1, hjust = 1), 
 				legend.position = "none") 
 
-ggsave(filename = "Fig C1a populations.png" , path = figure_path, width = 16, height = 7,  units = "cm",dpi = 600, device = "png")
-ggsave(filename = "Fig C1a populations.pdf" , path = figure_path, width = 16, height =7,  units = "cm",dpi = 300, device = "pdf")
+ggsave(filename = "Fig 1a populations.png" , path = figure_path, width = 16, height = 7,  units = "cm",dpi = 600, device = "png")
+ggsave(filename = "Fig 1a populations.pdf" , path = figure_path, width = 16, height =7,  units = "cm",dpi = 300, device = "pdf")
 
 
 
-# Plot B histograms ####
+# Plot Removed from graph: histograms ####
 
 # histograms of number of species per abundance bracket only year 0 and year 20 
 allHists<-  rbind(cbind(subset(df1prop, Year  %in% c(0,20) & NumberwErRounded>0), Scenario = props),
@@ -242,9 +242,6 @@ ggplot(data=allHists,  aes(x=(NumberRounded), fill = Scenario, alpha = Time, gro
 	theme(strip.background =element_rect(fill="white"), 
 				#	axis.line.x (),
 				legend.position = "right")
-
-ggsave(filename = "Fig C1b log SAD.png" , path = figure_path, width = 22, height = 7,  units = "cm",dpi = 600, device = "png")
-ggsave(filename = "Fig C1b log SAD.pdf" , path = figure_path, width = 22, height =7,  units = "cm",dpi = 300, device = "pdf")
 
 
 
@@ -314,7 +311,7 @@ alphaDisp2WError<- calculate_alpha_metrics(df1disp2wideWEr)
 
 
 
-# Plot C: Biodiversity metrics #####
+# Plot B: Biodiversity metrics #####
 # select metric to use
 ABprop<- subset(alphaProp, Unit_in_data == "abundance") 
 ABdisp<- subset(alphaDisp, Unit_in_data == "abundance") 
@@ -364,7 +361,7 @@ ggplot(abmarg  , aes(x = x, y = y))+
 				axis.text.x=element_blank(),
 				axis.text.y=element_blank(),
 				legend.position = "none")
-ggsave(filename = "Fig C1c abundance.pdf" , path = figure_path, width = 3, height = 3,  units = "cm",dpi = 300, device = "pdf")
+ggsave(filename = "Fig 1ba abundance.pdf" , path = figure_path, width = 3, height = 3,  units = "cm",dpi = 300, device = "pdf")
 
 
 
@@ -413,7 +410,7 @@ ggplot(Smarg  , aes(x = x, y = y))+
 				axis.text.x=element_blank(),
 				axis.text.y=element_blank(),
 				legend.position = "none")
-ggsave(filename = "Fig C1c richness.pdf" , path = figure_path, width = 3, height = 3,  units = "cm",dpi = 300, device = "pdf")
+ggsave(filename = "Fig 1Bb richness.pdf" , path = figure_path, width = 3, height = 3,  units = "cm",dpi = 300, device = "pdf")
 
 
 
@@ -467,7 +464,7 @@ ggplot(PIEmarg  , aes(x = x, y = y))+
 				axis.text.x=element_blank(),
 				axis.text.y=element_blank(),
 				legend.position = "none")
-ggsave(filename = "Fig C1c pie.pdf" , path = figure_path, width = 3, height = 3,  units = "cm",dpi = 300, device = "pdf")
+ggsave(filename = "Fig 1Bc pie.pdf" , path = figure_path, width = 3, height = 3,  units = "cm",dpi = 300, device = "pdf")
 
 
 
@@ -520,11 +517,11 @@ ggplot(evemarg  , aes(x = x, y = y))+
 				axis.text.x=element_blank(),
 				axis.text.y=element_blank(),
 				legend.position = "none")
-ggsave(filename = "Fig C1c evenness.pdf" , path = figure_path, width = 3, height = 3,  units = "cm",dpi = 300, device = "pdf")
+ggsave(filename = "Fig 1Bd evenness.pdf" , path = figure_path, width = 3, height = 3,  units = "cm",dpi = 300, device = "pdf")
 
 
 
-# Plot C final biodiversity metrics figure ####
+# Plot B final biodiversity metrics figure ####
 # for Species richness, we use the value with error to prevent artefacts. All others without error, 
 allMetrics<- rbind(
 	cbind(ABprop,  Scenario = props),  
@@ -555,8 +552,8 @@ ggplot(allMetrics, aes(x = Year, y = Number, color = Scenario))+
 				axis.line=element_line() ,
 				legend.position = "bottom")   
 
-ggsave(filename = "Fig C1c biodiversity metrics.png" , path = figure_path, width = 18, height = 7,  units = "cm",dpi = 600, device = "png")
-ggsave(filename = "Fig C1c biodiversity metrics.pdf" , path = figure_path, width = 18, height =7,  units = "cm",dpi = 300, device = "pdf")
+ggsave(filename = "Fig 1B biodiversity metrics.png" , path = figure_path, width = 18, height = 7,  units = "cm",dpi = 600, device = "png")
+ggsave(filename = "Fig 1B biodiversity metrics.pdf" , path = figure_path, width = 18, height =7,  units = "cm",dpi = 300, device = "pdf")
 
 
 
@@ -566,7 +563,7 @@ ggsave(filename = "Fig C1c biodiversity metrics.pdf" , path = figure_path, width
 
 
 
-# Plot D: change in number of species per SAD section #####
+# Plot C: change in number of species per SAD section #####
 # we select the data for the SAD interval, and run a model on each 
 sad1<- subset(alphaPropWError,   Unit_in_data == "logNr020") # select metric to model
 # run model
@@ -690,8 +687,8 @@ ggplot(SADmods)+
 
 
 
-ggsave(filename = "Fig C1e SAD change.png" , path = figure_path, width = 10, height = 11,  units = "cm",dpi = 600, device = "png")
-ggsave(filename = "Fig C1e SAD change.pdf" , path = figure_path, width = 10, height = 11,  units = "cm",dpi = 300, device = "pdf")
+ggsave(filename = "Fig 1C SAD change.png" , path = figure_path, width = 10, height = 11,  units = "cm",dpi = 600, device = "png")
+ggsave(filename = "Fig 1C SAD change.pdf" , path = figure_path, width = 10, height = 11,  units = "cm",dpi = 300, device = "pdf")
 
 
 
@@ -754,8 +751,8 @@ ggplot(SADmodMargs, aes(x = x, y = y, group = Scenario))+
 				strip.background = element_rect(colour = "white")
 	)
 
-ggsave(filename = "Fig C1e bubble SAD change.png" , path = figure_path, width = 10, height = 9,  units = "cm",dpi = 600, device = "png")
-ggsave(filename = "Fig C1e bubble SAD change.pdf" , path = figure_path, width = 10, height = 12,  units = "cm",dpi = 300, device = "pdf")
+ggsave(filename = "Fig 1C bubble SAD change.png" , path = figure_path, width = 10, height = 9,  units = "cm",dpi = 600, device = "png")
+ggsave(filename = "Fig 1C bubble SAD change.pdf" , path = figure_path, width = 10, height = 12,  units = "cm",dpi = 300, device = "pdf")
 
 
 
@@ -772,7 +769,7 @@ ggsave(filename = "Fig C1e bubble SAD change.pdf" , path = figure_path, width = 
 
 
 
-# Plot E: mean population changes per commonness class #####
+# Plot D: mean population changes per commonness class #####
 
 #allocate initial abundance groups based on 1st year: 
 head(df1prop)
@@ -802,34 +799,34 @@ q<- c(0.001, 0.01, 0.025, 0.05, 0.1, 0.3, 0.5, 0.7, 0.9, 0.95, 0.975, 0.99, 0.99
 # run models on each group in each scenario, and get the quantiles of the posterior 
 pop1<- subset(df1prop,   CGYr1 == 1 )
 modpop1<- inla( NumberRounded~ Year+
-									f(Species, Year, model='iid'), 
+									f(Species,  model='iid'), 
 								data = pop1 , 
 								family = fam,			
 								quantiles= q)
 
 pop2<- subset(df1prop,   CGYr1 ==2 )
 modpop2<- inla( NumberRounded~ Year+
-									f(Species, Year, model='iid'), 
+									f(Species,  model='iid'), 
 								data = pop2 , 
 								family = fam, 
 								quantiles=q)
 
 pop3<- subset(df1prop,   CGYr1 ==3 )
 modpop3<- inla( NumberRounded~ Year+
-									f(Species, Year, model='iid'), 
+									f(Species,  model='iid'), 
 								data = pop3 , 
 								family = fam, 
 								quantiles=q)
 pop4<- subset(df1prop,   CGYr1 ==4 )
 modpop4<- inla( NumberRounded~ Year+
-									f(Species, Year, model='iid'), 
+									f(Species,  model='iid'), 
 								data = pop4 , 
 								family = fam, 
 								quantiles=q)
 
 pop5<- subset(df1prop,   CGYr1 ==5 )
 modpop5<- inla(NumberRounded~ Year+
-							 	f(Species, Year, model='iid'), 
+							 	f(Species,  model='iid'), 
 							 data = pop5 , 
 							 family = fam, 
 							 quantiles=q)
@@ -837,34 +834,34 @@ modpop5<- inla(NumberRounded~ Year+
 
 pop1d<- subset(df1disp,   CGYr1 == 1 )
 modpop1d<- inla( NumberRounded~ Year+
-								 	f(Species, Year, model='iid'), 
+								 	f(Species, model='iid'), 
 								 data = pop1d , 
 								 family = fam, 
 								 quantiles=q)
 
 pop2d<- subset(df1disp,   CGYr1 ==2 )
 modpop2d<- inla( (NumberRounded)~ Year+
-								 	f(Species, Year, model='iid'), 
+								 	f(Species, model='iid'), 
 								 data = pop2d , 
 								 family = fam, 
 								 quantiles=q)
 
 pop3d<- subset(df1disp,   CGYr1 ==3 )
 modpop3d<- inla( NumberRounded~ Year+
-								 	f(Species, Year, model='iid'), 
+								 	f(Species, model='iid'), 
 								 data = pop3d , 
 								 family = fam, 
 								 quantiles=q)
 pop4d<- subset(df1disp,   CGYr1 ==4 )
 modpop4d<- inla(NumberRounded~ Year+
-									f(Species, Year, model='iid'), 
+									f(Species, model='iid'), 
 								data = pop4d, 
 								family = fam, 
 								quantiles=q)
 
 pop5d<- subset(df1disp,   CGYr1 ==5 )
 modpop5d<- inla( NumberRounded~ Year+
-								 	f(Species, Year, model='iid'), 
+								 	f(Species, model='iid'), 
 								 data = pop5d , 
 								 family = fam, 
 								 quantiles=q)
@@ -873,7 +870,7 @@ summary(modpop5d)
 pop1d2<- subset(df1disp2,   CGYr1 == 1 )
 # pop1d2$minYear<- -pop1d$Year 
 modpop1d2<- inla( NumberRounded ~ Year+
-										f(Species, Year, model='iid'), 
+										f(Species, model='iid'), 
 									data = pop1d2, 
 									family = fam, 
 									quantiles=q)
@@ -881,25 +878,28 @@ summary(modpop1d2)
 
 pop2d2<- subset(df1disp2,   CGYr1 ==2 )
 modpop2d2<- inla( NumberRounded~ Year+
-										f(Species, Year, model='iid'), 
+										f(Species, model='iid'), 
 									data = pop2d2 , 
 									family = fam, 
 									quantiles=q)
 
 pop3d2<- subset(df1disp2,   CGYr1 ==3 )
 modpop3d2<- inla( NumberRounded~ Year, 
+									f(Species,  model='iid'),
 									data = pop3d2 , 
 									family = fam, 
 									quantiles=q)
+
 pop4d2<- subset(df1disp2,   CGYr1 ==4 )
 modpop4d2<- inla( NumberRounded~ Year+
-										f(Species, Year, model='iid'), 
+										f(Species,  model='iid'), 
 									data = pop4d2 , 
 									family = fam, 
 									quantiles=q)
+
 pop5d2<- subset(df1disp2,   CGYr1 ==5 )
 modpop5d2<- inla( NumberRounded~ Year+
-										f(Species, Year, model='iid'), 
+										f(Species,  model='iid'), 
 									data = pop5d2 , 
 									family = fam, 
 									quantiles=q)
@@ -949,8 +949,8 @@ ggplot(poptrends)+
 				#axis.text.x  = element_text(angle=45, vjust=1, hjust = 1), 
 				legend.position = "bottom")   
 
-ggsave(filename = "Fig C1d v2 population trends.png" , path = figure_path, width = 10, height = 11,  units = "cm",dpi = 600, device = "png")
-ggsave(filename = "Fig C1d v2 population trends.pdf" , path = figure_path, width = 10, height = 11,  units = "cm",dpi = 300, device = "pdf")
+ggsave(filename = "Fig 1D population trends.png" , path = figure_path, width = 10, height = 11,  units = "cm",dpi = 600, device = "png")
+ggsave(filename = "Fig 1D population trends.pdf" , path = figure_path, width = 10, height = 11,  units = "cm",dpi = 300, device = "pdf")
 
 
 
@@ -1022,21 +1022,21 @@ ggplot(poptrendsGausWEr)+
 
 
 fam= 'Poisson'
-poptrendsPoisWEr<- rbind(cbind(inla( (NumberwErRounded)~ Year+f(Species, Year, model='iid'), data = pop1,	quantiles= q, family = fam)$summary.fixed[2,], SADinterval = "<20%",   Scenario = props),
-												 cbind(inla( (NumberwErRounded)~ Year+f(Species, Year, model='iid'), data = pop2,	quantiles= q, family = fam)$summary.fixed[2,], SADinterval = "20-40%",   Scenario = props),
-												 cbind(inla( (NumberwErRounded)~ Year+f(Species, Year, model='iid'), data = pop3,	quantiles= q, family = fam)$summary.fixed[2,], SADinterval = "40-60%",   Scenario = props),
-												 cbind(inla( (NumberwErRounded)~ Year+f(Species, Year, model='iid'), data = pop4,	quantiles= q, family = fam)$summary.fixed[2,], SADinterval = "60-80%",   Scenario = props),
-												 cbind(inla( (NumberwErRounded)~ Year+f(Species, Year, model='iid'), data = pop5,	quantiles= q, family = fam)$summary.fixed[2,], SADinterval = "80-100%",   Scenario = props),
-												 cbind(inla( (NumberwErRounded)~ Year+f(Species, Year, model='iid'), data = pop1d,	quantiles= q, family = fam)$summary.fixed[2,], SADinterval = "<20%",  Scenario = doms),
-												 cbind(inla( (NumberwErRounded)~ Year+f(Species, Year, model='iid'), data = pop2d,	quantiles= q, family = fam)$summary.fixed[2,], SADinterval = "20-40%",   Scenario = doms),
-												 cbind(inla( (NumberwErRounded)~ Year+f(Species, Year, model='iid'), data = pop3d,	quantiles= q, family = fam)$summary.fixed[2,], SADinterval = "40-60%",   Scenario = doms),
-												 cbind(inla( (NumberwErRounded)~ Year+f(Species, Year, model='iid'), data = pop4d,	quantiles= q, family = fam)$summary.fixed[2,], SADinterval = "60-80%",   Scenario = doms),
-												 cbind(inla( (NumberwErRounded)~ Year+f(Species, Year, model='iid'), data = pop5d,	quantiles= q, family = fam)$summary.fixed[2,], SADinterval = "80-100%",   Scenario = doms),
-												 cbind(inla( (NumberwErRounded)~ Year+f(Species, Year, model='iid'), data = pop1d2,	quantiles= q, family = fam)$summary.fixed[2,], SADinterval = "<20%",  Scenario = rares),
-												 cbind(inla( (NumberwErRounded)~ Year+f(Species, Year, model='iid'), data = pop2d2,	quantiles= q, family = fam)$summary.fixed[2,], SADinterval = "20-40%",   Scenario = rares),
-												 cbind(inla( (NumberwErRounded)~ Year+f(Species, Year, model='iid'), data = pop3d2,	quantiles= q, family = fam)$summary.fixed[2,], SADinterval = "40-60%",   Scenario = rares),
-												 cbind(inla( (NumberwErRounded)~ Year+f(Species, Year, model='iid'), data = pop4d2,	quantiles= q, family = fam)$summary.fixed[2,], SADinterval = "60-80%",   Scenario = rares),
-												 cbind(inla( (NumberwErRounded)~ Year+f(Species, Year, model='iid'), data = pop5d2,	quantiles= q, family = fam)$summary.fixed[2,], SADinterval = "80-100%",   Scenario = rares))
+poptrendsPoisWEr<- rbind(cbind(inla( (NumberwErRounded)~ Year+f(Species,  model='iid'), data = pop1,	quantiles= q, family = fam)$summary.fixed[2,], SADinterval = "<20%",   Scenario = props),
+												 cbind(inla( (NumberwErRounded)~ Year+f(Species,  model='iid'), data = pop2,	quantiles= q, family = fam)$summary.fixed[2,], SADinterval = "20-40%",   Scenario = props),
+												 cbind(inla( (NumberwErRounded)~ Year+f(Species,  model='iid'), data = pop3,	quantiles= q, family = fam)$summary.fixed[2,], SADinterval = "40-60%",   Scenario = props),
+												 cbind(inla( (NumberwErRounded)~ Year+f(Species,  model='iid'), data = pop4,	quantiles= q, family = fam)$summary.fixed[2,], SADinterval = "60-80%",   Scenario = props),
+												 cbind(inla( (NumberwErRounded)~ Year+f(Species,  model='iid'), data = pop5,	quantiles= q, family = fam)$summary.fixed[2,], SADinterval = "80-100%",   Scenario = props),
+												 cbind(inla( (NumberwErRounded)~ Year+f(Species,  model='iid'), data = pop1d,	quantiles= q, family = fam)$summary.fixed[2,], SADinterval = "<20%",  Scenario = doms),
+												 cbind(inla( (NumberwErRounded)~ Year+f(Species,  model='iid'), data = pop2d,	quantiles= q, family = fam)$summary.fixed[2,], SADinterval = "20-40%",   Scenario = doms),
+												 cbind(inla( (NumberwErRounded)~ Year+f(Species,  model='iid'), data = pop3d,	quantiles= q, family = fam)$summary.fixed[2,], SADinterval = "40-60%",   Scenario = doms),
+												 cbind(inla( (NumberwErRounded)~ Year+f(Species,  model='iid'), data = pop4d,	quantiles= q, family = fam)$summary.fixed[2,], SADinterval = "60-80%",   Scenario = doms),
+												 cbind(inla( (NumberwErRounded)~ Year+f(Species,  model='iid'), data = pop5d,	quantiles= q, family = fam)$summary.fixed[2,], SADinterval = "80-100%",   Scenario = doms),
+												 cbind(inla( (NumberwErRounded)~ Year+f(Species,  model='iid'), data = pop1d2,	quantiles= q, family = fam)$summary.fixed[2,], SADinterval = "<20%",  Scenario = rares),
+												 cbind(inla( (NumberwErRounded)~ Year+f(Species,  model='iid'), data = pop2d2,	quantiles= q, family = fam)$summary.fixed[2,], SADinterval = "20-40%",   Scenario = rares),
+												 cbind(inla( (NumberwErRounded)~ Year+f(Species,  model='iid'), data = pop3d2,	quantiles= q, family = fam)$summary.fixed[2,], SADinterval = "40-60%",   Scenario = rares),
+												 cbind(inla( (NumberwErRounded)~ Year+f(Species,  model='iid'), data = pop4d2,	quantiles= q, family = fam)$summary.fixed[2,], SADinterval = "60-80%",   Scenario = rares),
+												 cbind(inla( (NumberwErRounded)~ Year+f(Species,  model='iid'), data = pop5d2,	quantiles= q, family = fam)$summary.fixed[2,], SADinterval = "80-100%",   Scenario = rares))
 
 ggplot(poptrendsPoisWEr)+
 	ggtitle('Poisson model with error')+
